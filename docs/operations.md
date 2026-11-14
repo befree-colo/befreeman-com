@@ -4,15 +4,16 @@ This runbook covers the Cloudflare resources, the secrets they need, and how to 
 
 ## How it fits together
 
-| Piece | Built by | Stored in | Goes live when |
-|---|---|---|---|
-| Shell + pre-rendered pages | `nx run prerender:run` | Worker static assets (`dist/apps/shell`) | `wrangler deploy` |
-| Remotes: `achievements` (Angular), `timeline` (Vue), `skills` (React) | `nx build remote-*` | R2 `remotes/<name>/<version>/` | the manifest points at that version |
-| Shared UI components (`ui`) | `nx build ui-components` | R2 `ui/<version>/` | the manifest points at that version |
-| Career content | `nx run content:bundle` | R2 `content/content.<hash>.json` | the manifest points at that hash |
-| Deployment manifest | `release` tool | KV `manifest:live` | a single KV write (atomic) |
+| Piece                                                                 | Built by                 | Stored in                                | Goes live when                      |
+| --------------------------------------------------------------------- | ------------------------ | ---------------------------------------- | ----------------------------------- |
+| Shell + pre-rendered pages                                            | `nx run prerender:run`   | Worker static assets (`dist/apps/shell`) | `wrangler deploy`                   |
+| Remotes: `achievements` (Angular), `timeline` (Vue), `skills` (React) | `nx build remote-*`      | R2 `remotes/<name>/<version>/`           | the manifest points at that version |
+| Shared UI components (`ui`)                                           | `nx build ui-components` | R2 `ui/<version>/`                       | the manifest points at that version |
+| Career content                                                        | `nx run content:bundle`  | R2 `content/content.<hash>.json`         | the manifest points at that hash    |
+| Deployment manifest                                                   | `release` tool           | KV `manifest:live`                       | a single KV write (atomic)          |
 
 The Worker (`apps/edge`) runs first on every request:
+
 - it serves `/mfe-manifest.json` from KV, with `no-cache` and an ETag;
 - it serves `/remotes/*`, `/ui/*`, and `/content/*` from R2 with `immutable` caching;
 - it reserves `/api/*`;
@@ -44,13 +45,17 @@ To serve the site on `befreeman.com`, add the domain to the Cloudflare account. 
 
 ### API token for CI
 
-Create a token with **Workers Scripts: Edit**, **Workers KV Storage: Edit**, **Workers R2 Storage: Edit**, and **Account Settings: Read**. Add these GitHub Actions secrets to the repository:
+Create a token with **Workers Scripts: Edit**, **Workers KV Storage: Edit**, **Workers R2 Storage: Edit**, and **Account Settings: Read**.
 
-| Secret | Value |
-|---|---|
-| `CLOUDFLARE_API_TOKEN` | the token above |
-| `CLOUDFLARE_ACCOUNT_ID` | the account id |
-| `PREVIEW_SECRET` | the same value given to `wrangler secret put PREVIEW_SECRET --env staging` |
+CI runs on Bitbucket Cloud Pipelines (see `bitbucket-pipelines.yml`). In the Bitbucket repository, open **Repository settings → Deployments** and add these as **secured** variables on the `staging` and `production` deployment environments. Secured variables are masked in logs and can't be read back after saving.
+
+| Variable                | Value                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_TOKEN`  | the token above                                                                   |
+| `CLOUDFLARE_ACCOUNT_ID` | the account id                                                                    |
+| `PREVIEW_SECRET`        | the same value given to `wrangler secret put PREVIEW_SECRET` for that environment |
+
+Only steps that declare `deployment: staging` or `deployment: production` can see these variables, so pull-request builds never have Cloudflare credentials. The deployment steps themselves come with the `deploy-to-cloudflare` change.
 
 ## Commands
 
@@ -101,6 +106,7 @@ pnpm release promote content <hash> [--remote --env staging]
 ```
 
 Before switching the manifest, promote runs a **smoke check** in headless Chromium against `--base-url`. It loads the remote's page with a signed preview override (`?mfe-override=<name>@<version>&mfe-exp=…&mfe-token=…`) and requires all of the following:
+
 - the Worker reports `x-bf-preview: applied`;
 - the remote's slot reaches `data-remote-state="mounted"`;
 - there are no console errors.
@@ -139,22 +145,26 @@ pnpm nx run prerender:run && pnpm nx run-many -t build -p remote-achievements re
 printf 'PREVIEW_SECRET=local-dev-secret\n' > apps/edge/.dev.vars     # gitignored
 # publish + init as above, without --remote
 pnpm nx serve edge                                                    # wrangler dev on :8787
-E2E_BASE_URL=http://localhost:8787 pnpm nx run e2e:e2e                # full e2e suite against the Worker
+(cd apps/e2e && E2E_BASE_URL=http://localhost:8787 pnpm exec playwright test)   # full e2e suite against the Worker
 PREVIEW_SECRET=local-dev-secret pnpm release promote timeline <v> --base-url http://localhost:8787
 ```
 
-`wrangler dev` needs a TTY. In a non-interactive shell, run it under `script -qec "…" /dev/null`.
+- Build **before** starting `wrangler dev`, and don't rebuild while it runs. `nx run e2e:e2e` re-runs `prerender:run`, which rewrites `dist/apps/shell`. Wrangler reloads partway through and keeps an incomplete asset list, so pages such as `/timeline` return 404 until you restart it. That's why the suite above runs Playwright directly.
+- `wrangler dev` needs a TTY. In a non-interactive shell, run it under `script -qec "…" /dev/null`.
+- `wrangler rollback` (whole-site) only works against Cloudflare, so it can't be rehearsed locally.
 
 ## Verification log
 
-| Date | Environment | What was verified | Result |
-|---|---|---|---|
-| 2026-11-13 | local (`wrangler dev` + local R2/KV) | publish ×5, init, the full e2e suite (36 tests) through the Worker, promote with a passing smoke check, a duplicate publish refused, a broken build's promotion refused by the smoke check (live manifest unchanged), rollback | ✅ |
-| pending | staging | every command above, run with `--remote --env staging` | ⏳ needs the Cloudflare account set up above |
+| Date       | Environment                          | What was verified                                                                                                                                                                                                                                                                                                                                                                                                                    | Result                                       |
+| ---------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| 2026-11-13 | local (`wrangler dev` + local R2/KV) | publish ×5, init, the full e2e suite (36 tests) through the Worker, promote with a passing smoke check, a duplicate publish refused, a broken build's promotion refused by the smoke check (live manifest unchanged), rollback                                                                                                                                                                                                       | ✅                                           |
+| 2026-11-13 | local, from empty R2/KV state        | the build and `prerender:run`, publish ×5 (3 remotes, `ui`, `content`), `init`, `status`, manifest headers (`no-cache`, ETag, CSP), `preview-link` (the signed link sets the `bf-preview` cookie), duplicate publish refused (exit 1), `--skip-existing` (exit 0), `promote` with a passing smoke check, `promote content`, `rollback` from history and to an explicit version, and the full e2e suite through the Worker (53 tests) | ✅                                           |
+| pending    | staging                              | every command above, run with `--remote --env staging`                                                                                                                                                                                                                                                                                                                                                                               | ⏳ needs the Cloudflare account set up above |
 
 ## Rollback drill
 
-To be recorded after staging exists (task 13.2):
+To be recorded after staging exists (`deploy-to-cloudflare` change):
+
 1. Publish a deliberately broken remote (e.g. `--dist` pointing at a build whose `remoteEntry.js` throws).
 2. Promote it with `--skip-smoke`.
 3. Confirm the site shows that section's static fallback with the "unavailable" notice.

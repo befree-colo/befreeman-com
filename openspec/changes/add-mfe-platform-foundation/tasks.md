@@ -73,7 +73,7 @@
 - [x] 11.1 Implement the Worker: static assets, `/remotes/*` and `/content/*` from R2 with immutable caching, `/mfe-manifest.json` from KV with no-cache and an ETag, CSP `script-src 'self'`, and a reserved `/api/*` route returning 404. Verify with Vitest tests using Miniflare or `@cloudflare/vitest-pool-workers`.
 - [x] 11.2 Implement the signed preview override `?mfe-override=<name>@<version>` (HMAC token required, R2-existing versions only). Verify with Worker tests for a valid token, a missing token, and an unknown version.
 - [x] 11.3 Implement `publish-remote`, which also handles the `ui` artifact (refuses existing version prefixes), `promote` (smoke check, then an atomic manifest write with history), and `rollback`. Verify with tests against Miniflare R2/KV, covering the duplicate-version refusal, rollback to the prior manifest, and `ui` promotion blocked when any live remote's smoke check fails.
-- [ ] 11.4 Write `docs/operations.md` covering Cloudflare resources, secrets (as Bitbucket secured deployment variables), and the publish, promote, rollback, and preview-link commands. Verify each command against the local Worker (`wrangler dev` with local R2/KV) and record the result in its verification log.
+- [x] 11.4 Write `docs/operations.md` covering Cloudflare resources, secrets (as Bitbucket secured deployment variables), and the publish, promote, rollback, and preview-link commands. Verify each command against the local Worker (`wrangler dev` with local R2/KV) and record the result in its verification log.
 
 ## 12. CI on Bitbucket Cloud Pipelines (free plan)
 
