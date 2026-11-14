@@ -1,0 +1,17 @@
+{
+  "name": "@befreeman/prerender",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@befreeman/content": "workspace:*",
+    "@befreeman/design-system": "workspace:*",
+    "@befreeman/page-templates": "workspace:*"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/space-grotesk": "5.3.0",
+    "@resvg/resvg-js": "2.6.2",
+    "satori": "0.63.2"
+  }
+}

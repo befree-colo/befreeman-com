@@ -1,0 +1,53 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "edge",
+  "projectType": "application",
+  "sourceRoot": "apps/edge/src",
+  "tags": [
+    "type:app",
+    "platform:cloudflare"
+  ],
+  "targets": {
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "serve": {
+      "command": "wrangler dev --port 8787",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "continuous": true,
+      "dependsOn": [
+        {
+          "projects": [
+            "prerender"
+          ],
+          "target": "run"
+        }
+      ]
+    },
+    "deploy": {
+      "command": "wrangler deploy",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "prerender"
+          ],
+          "target": "run"
+        }
+      ]
+    }
+  }
+}

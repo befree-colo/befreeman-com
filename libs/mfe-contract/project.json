@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "mfe-contract",
+  "projectType": "library",
+  "sourceRoot": "libs/mfe-contract/src",
+  "tags": ["type:lib"],
+  "targets": {
+    "test": {
+      "command": "vitest run",
+      "options": { "cwd": "{projectRoot}" }
+    },
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": { "cwd": "{projectRoot}" }
+    }
+  }
+}

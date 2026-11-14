@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": { "rootDir": "../../..", "outDir": "../../../../../tmp/ngc-ui-components", "declaration": false, "types": [] },
+  "files": ["fixture.component.ts"],
+  "angularCompilerOptions": { "strictTemplates": true, "strictDomEventTypes": true }
+}

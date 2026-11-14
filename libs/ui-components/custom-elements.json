@@ -1,0 +1,630 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/components/button.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "BfButton",
+          "cssParts": [
+            {
+              "description": "the native <button> or <a>",
+              "name": "control"
+            }
+          ],
+          "slots": [
+            {
+              "description": "label",
+              "name": ""
+            },
+            {
+              "description": "optional leading icon",
+              "name": "icon"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "ButtonVariant"
+              },
+              "default": "'primary'",
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "ButtonSize"
+              },
+              "default": "'md'",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Renders a link instead of a button.",
+              "attribute": "href"
+            },
+            {
+              "kind": "field",
+              "name": "target",
+              "type": {
+                "text": "string | undefined"
+              },
+              "attribute": "target"
+            },
+            {
+              "kind": "field",
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "disabled",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "type",
+              "type": {
+                "text": "'button' | 'submit' | 'reset'"
+              },
+              "default": "'button'",
+              "attribute": "type"
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name when the slot holds only an icon.",
+              "attribute": "label"
+            },
+            {
+              "kind": "method",
+              "name": "focus",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "options",
+                  "optional": true,
+                  "type": {
+                    "text": "FocusOptions"
+                  }
+                }
+              ]
+            }
+          ],
+          "attributes": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "ButtonVariant"
+              },
+              "default": "'primary'",
+              "fieldName": "variant"
+            },
+            {
+              "name": "size",
+              "type": {
+                "text": "ButtonSize"
+              },
+              "default": "'md'",
+              "fieldName": "size"
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Renders a link instead of a button.",
+              "fieldName": "href"
+            },
+            {
+              "name": "target",
+              "type": {
+                "text": "string | undefined"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "disabled",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "disabled"
+            },
+            {
+              "name": "type",
+              "type": {
+                "text": "'button' | 'submit' | 'reset'"
+              },
+              "default": "'button'",
+              "fieldName": "type"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Accessible name when the slot holds only an icon.",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "BfElement",
+            "module": "/src/base"
+          },
+          "tagName": "bf-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "BfButton",
+          "declaration": {
+            "name": "BfButton",
+            "module": "src/components/button.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/card.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "BfCard",
+          "cssParts": [
+            {
+              "description": "the outer element",
+              "name": "card"
+            }
+          ],
+          "slots": [
+            {
+              "description": "title area",
+              "name": "heading"
+            },
+            {
+              "description": "body",
+              "name": ""
+            },
+            {
+              "description": "actions or metadata",
+              "name": "footer"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "variant",
+              "type": {
+                "text": "CardVariant"
+              },
+              "default": "'raised'",
+              "attribute": "variant",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Makes the whole card a link.",
+              "attribute": "href"
+            },
+            {
+              "kind": "field",
+              "name": "highlighted",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Visual highlight, e.g. when an `entity:focus` event targets this card.",
+              "attribute": "highlighted",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "variant",
+              "type": {
+                "text": "CardVariant"
+              },
+              "default": "'raised'",
+              "fieldName": "variant"
+            },
+            {
+              "name": "href",
+              "type": {
+                "text": "string | undefined"
+              },
+              "description": "Makes the whole card a link.",
+              "fieldName": "href"
+            },
+            {
+              "name": "highlighted",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "description": "Visual highlight, e.g. when an `entity:focus` event targets this card.",
+              "fieldName": "highlighted"
+            }
+          ],
+          "superclass": {
+            "name": "BfElement",
+            "module": "/src/base"
+          },
+          "tagName": "bf-card",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "BfCard",
+          "declaration": {
+            "name": "BfCard",
+            "module": "src/components/card.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/chip.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "BfChip",
+          "cssParts": [
+            {
+              "description": "the chip element",
+              "name": "chip"
+            }
+          ],
+          "slots": [
+            {
+              "description": "label",
+              "name": ""
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "interactive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "interactive",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "selected",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "selected",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "value",
+              "type": {
+                "text": "string | undefined"
+              },
+              "attribute": "value"
+            },
+            {
+              "kind": "method",
+              "name": "toggle",
+              "privacy": "private"
+            }
+          ],
+          "events": [
+            {
+              "name": "bf-toggle",
+              "type": {
+                "text": "CustomEvent"
+              },
+              "description": "CustomEvent<ChipToggleDetail> when an interactive chip is toggled"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "interactive",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "interactive"
+            },
+            {
+              "name": "selected",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "selected"
+            },
+            {
+              "name": "value",
+              "type": {
+                "text": "string | undefined"
+              },
+              "fieldName": "value"
+            }
+          ],
+          "superclass": {
+            "name": "BfElement",
+            "module": "/src/base"
+          },
+          "tagName": "bf-chip",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "BfChip",
+          "declaration": {
+            "name": "BfChip",
+            "module": "src/components/chip.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/dialog.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "BfDialog",
+          "cssParts": [
+            {
+              "description": "the native dialog",
+              "name": "dialog"
+            }
+          ],
+          "slots": [
+            {
+              "description": "dialog title (also its accessible name)",
+              "name": "heading"
+            },
+            {
+              "description": "body",
+              "name": ""
+            },
+            {
+              "description": "actions",
+              "name": "footer"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "attribute": "open",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "closeLabel",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Close'",
+              "description": "Accessible label for the close button.",
+              "attribute": "close-label"
+            },
+            {
+              "kind": "field",
+              "name": "dialogEl",
+              "type": {
+                "text": "HTMLDialogElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "returnFocusTo",
+              "type": {
+                "text": "HTMLElement | null"
+              },
+              "privacy": "private",
+              "default": "null"
+            },
+            {
+              "kind": "method",
+              "name": "show",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "close",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              }
+            },
+            {
+              "kind": "field",
+              "name": "onNativeClose",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "onBackdropClick",
+              "privacy": "private"
+            }
+          ],
+          "events": [
+            {
+              "description": "after the dialog closes",
+              "name": "bf-close"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "open",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "open"
+            },
+            {
+              "name": "close-label",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Close'",
+              "description": "Accessible label for the close button.",
+              "fieldName": "closeLabel"
+            }
+          ],
+          "superclass": {
+            "name": "BfElement",
+            "module": "/src/base"
+          },
+          "tagName": "bf-dialog",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "BfDialog",
+          "declaration": {
+            "name": "BfDialog",
+            "module": "src/components/dialog.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/theme-toggle.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "BfThemeToggle",
+          "cssParts": [
+            {
+              "description": "the switch button",
+              "name": "control"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "theme",
+              "type": {
+                "text": "ThemeMode"
+              },
+              "default": "'light'",
+              "attribute": "theme",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Dark mode'",
+              "attribute": "label"
+            },
+            {
+              "kind": "method",
+              "name": "toggle",
+              "privacy": "private"
+            }
+          ],
+          "events": [
+            {
+              "name": "bf-theme-change",
+              "type": {
+                "text": "CustomEvent"
+              },
+              "description": "CustomEvent<ThemeChangeDetail>"
+            }
+          ],
+          "attributes": [
+            {
+              "name": "theme",
+              "type": {
+                "text": "ThemeMode"
+              },
+              "default": "'light'",
+              "fieldName": "theme"
+            },
+            {
+              "name": "label",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Dark mode'",
+              "fieldName": "label"
+            }
+          ],
+          "superclass": {
+            "name": "BfElement",
+            "module": "/src/base"
+          },
+          "tagName": "bf-theme-toggle",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "BfThemeToggle",
+          "declaration": {
+            "name": "BfThemeToggle",
+            "module": "src/components/theme-toggle.ts"
+          }
+        }
+      ]
+    }
+  ]
+}

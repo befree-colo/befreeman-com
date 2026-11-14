@@ -1,0 +1,14 @@
+{
+  "name": "@befreeman/edge",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.8.2",
+    "@cloudflare/workers-types": "5.20261114.1",
+    "wrangler": "4.161.0"
+  },
+  "dependencies": {
+    "@befreeman/mfe-contract": "workspace:*"
+  }
+}

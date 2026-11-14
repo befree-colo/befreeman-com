@@ -1,0 +1,26 @@
+# PLACEHOLDER skills — replace with your real skills and honest proficiency (1-5).
+categories:
+  - id: architecture
+    name: Architecture
+    skills:
+      - { id: domain-driven-design, name: Domain-Driven Design, proficiency: 5, years: 10, placeholder: true }
+      - { id: event-driven-architecture, name: Event-Driven Architecture, proficiency: 5, years: 9, placeholder: true }
+      - { id: module-federation, name: Micro Frontends / Module Federation, proficiency: 4, years: 4, placeholder: true }
+  - id: frontend
+    name: Frontend
+    skills:
+      - { id: angular, name: Angular, proficiency: 5, years: 9, placeholder: true }
+      - { id: react, name: React, proficiency: 4, years: 8, placeholder: true }
+      - { id: accessibility, name: Accessibility, proficiency: 4, years: 6, placeholder: true }
+      - { id: web-performance, name: Web Performance, proficiency: 4, years: 7, placeholder: true }
+  - id: backend
+    name: Backend & Languages
+    skills:
+      - { id: typescript, name: TypeScript, proficiency: 5, years: 10, placeholder: true }
+      - { id: node-js, name: Node.js, proficiency: 4, years: 10, placeholder: true }
+  - id: cloud
+    name: Cloud & Platform
+    skills:
+      - { id: aws, name: AWS, proficiency: 4, years: 8, placeholder: true }
+      - { id: kubernetes, name: Kubernetes, proficiency: 3, years: 5, placeholder: true }
+      - { id: cloudflare, name: Cloudflare, proficiency: 4, years: 3, placeholder: true }

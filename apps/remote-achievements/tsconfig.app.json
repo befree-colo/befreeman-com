@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/out-tsc/remote-achievements"
+  },
+  "files": [
+    "src/main.ts",
+    "src/mount.ts",
+    "src/globals.d.ts"
+  ],
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "test/**/*"
+  ]
+}

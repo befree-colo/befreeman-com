@@ -1,0 +1,44 @@
+{
+  "name": "@befreeman/ui-components",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "./src/index.ts"
+  ],
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./elements": {
+      "types": "./types/elements.d.ts"
+    },
+    "./dom": {
+      "types": "./types/dom.d.ts"
+    },
+    "./react": {
+      "types": "./types/react.d.ts"
+    },
+    "./vue": {
+      "types": "./types/vue.d.ts"
+    },
+    "./custom-elements.json": "./custom-elements.json"
+  },
+  "dependencies": {
+    "@befreeman/design-system": "workspace:*",
+    "lit": "3.3.3"
+  },
+  "devDependencies": {
+    "@angular/common": "22.2.6",
+    "@angular/compiler": "22.2.6",
+    "@angular/compiler-cli": "22.2.6",
+    "@angular/core": "22.2.6",
+    "@angular/platform-browser": "22.2.6",
+    "@custom-elements-manifest/analyzer": "0.11.0",
+    "@types/react": "^19.3.0",
+    "react": "19.3.1",
+    "rxjs": "^7.8.2",
+    "vue": "3.5.45",
+    "vue-tsc": "^2.2.12"
+  },
+  "customElements": "custom-elements.json"
+}

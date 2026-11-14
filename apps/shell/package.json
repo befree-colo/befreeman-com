@@ -1,0 +1,13 @@
+{
+  "name": "@befreeman/shell",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@befreeman/content": "workspace:*",
+    "@befreeman/design-system": "workspace:*",
+    "@befreeman/mfe-contract": "workspace:*",
+    "@befreeman/page-templates": "workspace:*",
+    "@befreeman/ui-components": "workspace:*"
+  }
+}

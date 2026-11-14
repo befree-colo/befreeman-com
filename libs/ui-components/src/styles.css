@@ -1,0 +1,3 @@
+/* Compiled into one constructable sheet shared by every bf-* component. */
+@import '@befreeman/design-system/tailwind.css';
+@source './components';

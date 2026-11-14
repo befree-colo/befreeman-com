@@ -1,0 +1,9 @@
+dist
+node_modules
+.nx
+pnpm-lock.yaml
+openspec
+coverage
+test-results
+playwright-report
+.wrangler

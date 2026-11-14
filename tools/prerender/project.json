@@ -1,0 +1,43 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "prerender",
+  "projectType": "library",
+  "sourceRoot": "tools/prerender/src",
+  "tags": [
+    "type:tool"
+  ],
+  "targets": {
+    "run": {
+      "command": "tsx src/cli.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "shell"
+          ],
+          "target": "build"
+        },
+        {
+          "projects": [
+            "content"
+          ],
+          "target": "bundle"
+        }
+      ]
+    },
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

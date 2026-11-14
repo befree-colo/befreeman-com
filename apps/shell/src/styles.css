@@ -1,0 +1,118 @@
+/* Shell global stylesheet: page-level document.css + the shared Tailwind theme. */
+@import '@befreeman/design-system/css/document.css';
+@import '@befreeman/design-system/tailwind.css';
+@source '../src';
+@source '../../../libs/page-templates/src';
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply absolute top-2 left-2 z-50 -translate-y-24 rounded-md bg-accent px-4 py-2 font-semibold text-accent-ink no-underline focus:translate-y-0;
+  }
+
+  .bf-hero-glow {
+    background:
+      radial-gradient(40rem 24rem at 85% 10%, color-mix(in oklab, var(--bf-accent) 32%, transparent), transparent 70%),
+      radial-gradient(30rem 20rem at 10% 90%, color-mix(in oklab, var(--bf-accent-2) 22%, transparent), transparent 70%);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bf-hero-glow {
+      animation: bf-drift 18s var(--ease-standard) infinite alternate;
+    }
+  }
+
+  .bf-cta {
+    @apply transition-transform duration-token-fast ease-standard hover:-translate-y-0.5;
+  }
+
+  .bf-prose h2 {
+    @apply mt-8 mb-3 font-display text-2xl font-bold;
+  }
+  .bf-prose p {
+    @apply mb-4 text-ink-muted;
+  }
+  .bf-prose ul {
+    @apply mb-4 list-disc pl-6;
+  }
+
+  .bf-remote-host {
+    display: block;
+  }
+  .bf-remote-host[data-state='mounting'] {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+
+  .bf-remote-notice {
+    @apply mb-4 inline-flex items-center gap-2 rounded-pill bg-surface-sunken px-4 py-1.5 text-sm text-ink-muted ring-1 ring-border;
+  }
+
+  /* Architecture view */
+  .bf-arch-label {
+    display: none;
+  }
+  html[data-arch] .bf-arch-label {
+    @apply absolute -top-3.5 left-3 z-20 flex items-center gap-2 rounded-pill bg-surface px-3 py-0.5 font-mono text-xs text-ink shadow-md ring-2;
+  }
+  html[data-arch] .bf-slot {
+    @apply rounded-lg outline-2 outline-offset-8 outline-dashed;
+  }
+  /* Framework colors are decorative (outline, ring, dot); label text stays in AA-contrast ink. */
+  .bf-slot[data-remote-framework='angular'] {
+    --bf-fw: #dd0031;
+  }
+  .bf-slot[data-remote-framework='vue'] {
+    --bf-fw: #42b883;
+  }
+  .bf-slot[data-remote-framework='react'] {
+    --bf-fw: #149eca;
+  }
+  .bf-slot[data-remote-state='failed'] {
+    --bf-fw: var(--bf-danger);
+  }
+  html[data-arch] .bf-slot {
+    outline-color: var(--bf-fw, var(--bf-border));
+  }
+  html[data-arch] .bf-slot .bf-arch-label {
+    color: var(--bf-ink);
+    --tw-ring-color: var(--bf-fw, var(--bf-border));
+  }
+  html[data-arch] .bf-slot .bf-arch-label::before {
+    content: '';
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 999px;
+    background: var(--bf-fw, var(--bf-border));
+  }
+  html[data-arch] .bf-slot[data-remote-state='failed'] .bf-arch-label {
+    color: var(--bf-danger);
+  }
+  html[data-arch] [data-region='shell'] {
+    @apply relative outline-2 -outline-offset-4 outline-dashed outline-accent;
+  }
+  html[data-arch] [data-region='shell'] > .bf-arch-label {
+    @apply fixed top-auto bottom-4 left-4 ring-accent;
+    color: var(--bf-accent);
+  }
+}
+
+@keyframes bf-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-4%, 3%, 0) scale(1.08);
+  }
+}

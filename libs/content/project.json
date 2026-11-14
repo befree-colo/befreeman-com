@@ -1,0 +1,30 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "content",
+  "projectType": "library",
+  "sourceRoot": "libs/content/src",
+  "tags": ["type:lib"],
+  "targets": {
+    "bundle": {
+      "command": "tsx src/cli/bundle.ts",
+      "options": { "cwd": "{projectRoot}" },
+      "inputs": ["{projectRoot}/content/**/*", "{projectRoot}/src/**/*.ts", "!{projectRoot}/src/**/*.test.ts"],
+      "outputs": ["{workspaceRoot}/dist/libs/content"],
+      "cache": true
+    },
+    "validate": {
+      "command": "tsx src/cli/bundle.ts --check",
+      "options": { "cwd": "{projectRoot}" },
+      "inputs": ["{projectRoot}/content/**/*", "{projectRoot}/src/**/*.ts"],
+      "cache": true
+    },
+    "test": {
+      "command": "vitest run",
+      "options": { "cwd": "{projectRoot}" }
+    },
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": { "cwd": "{projectRoot}" }
+    }
+  }
+}

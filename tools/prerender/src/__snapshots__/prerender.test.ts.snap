@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`metadata > head tags snapshot (home and one achievement) 1`] = `
+"<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Brian Freeman · Software Engineer &amp; Architect</title>
+    <meta name="description" content="I design and build distributed systems and frontend platforms that let teams ship fast without breaking things." />
+    <link rel="canonical" href="https://befreeman.com/" />
+    <meta property="og:type" content="profile" />
+    <meta property="og:title" content="Brian Freeman · Software Engineer &amp; Architect" />
+    <meta property="og:description" content="I design and build distributed systems and frontend platforms that let teams ship fast without breaking things." />
+    <meta property="og:url" content="https://befreeman.com/" />
+    <meta property="og:image" content="https://befreeman.com/og/home.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Brian Freeman" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Brian Freeman · Software Engineer &amp; Architect" />
+    <meta name="twitter:description" content="I design and build distributed systems and frontend platforms that let teams ship fast without breaking things." />
+    <meta name="twitter:image" content="https://befreeman.com/og/home.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Brian Freeman","jobTitle":"Software Engineer \\u0026 Architect","description":"I design and build distributed systems and frontend platforms that let teams ship fast without breaking things.","url":"https://befreeman.com/","image":"https://befreeman.com/og/home.png","address":{"@type":"PostalAddress","addressRegion":"United States"},"sameAs":["https://www.linkedin.com/","https://github.com/"],"knowsAbout":["Domain-Driven Design","Event-Driven Architecture","Micro Frontends / Module Federation","Angular","React","Accessibility","Web Performance","TypeScript","Node.js","AWS","Kubernetes","Cloudflare"],"hasOccupation":[{"@type":"Occupation","name":"Principal Software Architect","occupationLocation":{"@type":"Place","name":"Remote"}},{"@type":"Occupation","name":"Staff Software Engineer"},{"@type":"Occupation","name":"Senior Software Engineer"}]}</script>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/theme-init.js"></script>
+  "
+`;
+
+exports[`metadata > head tags snapshot (home and one achievement) 2`] = `
+"<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AngularJS to Angular modernization · Brian Freeman</title>
+    <meta name="description" content="PLACEHOLDER — led an incremental migration of a large AngularJS app with no feature freeze." />
+    <link rel="canonical" href="https://befreeman.com/achievements/angular-modernization" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="AngularJS to Angular modernization · Brian Freeman" />
+    <meta property="og:description" content="PLACEHOLDER — led an incremental migration of a large AngularJS app with no feature freeze." />
+    <meta property="og:url" content="https://befreeman.com/achievements/angular-modernization" />
+    <meta property="og:image" content="https://befreeman.com/og/achievements-angular-modernization.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AngularJS to Angular modernization" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AngularJS to Angular modernization · Brian Freeman" />
+    <meta name="twitter:description" content="PLACEHOLDER — led an incremental migration of a large AngularJS app with no feature freeze." />
+    <meta name="twitter:image" content="https://befreeman.com/og/achievements-angular-modernization.png" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/theme-init.js"></script>
+  "
+`;
