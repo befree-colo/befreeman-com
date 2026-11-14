@@ -53,6 +53,29 @@
           "target": "run"
         }
       ]
+    },
+    "lighthouse": {
+      "command": "lhci autorun --config=lighthouserc.cjs",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "remote-achievements",
+            "remote-timeline",
+            "remote-skills",
+            "ui-components"
+          ],
+          "target": "build"
+        },
+        {
+          "projects": [
+            "prerender"
+          ],
+          "target": "run"
+        }
+      ]
     }
   }
 }

@@ -6,7 +6,7 @@ import { esc, prerenderPaths } from '@befreeman/page-templates';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { jsonLdScript, personJsonLd } from './meta';
 import { renderOgImage } from './og';
-import { assertTemplate, renderPage, robotsTxt, sitemapXml } from './render';
+import { assertTemplate, fontPreloads, renderPage, robotsTxt, sitemapXml } from './render';
 
 const SITE = 'https://befreeman.com';
 let b: CareerContentBundle;
@@ -136,5 +136,23 @@ describe('preview images', () => {
     expect(png.subarray(1, 4).toString()).toBe('PNG');
     expect(png.readUInt32BE(16)).toBe(1200);
     expect(png.readUInt32BE(20)).toBe(630);
+  });
+});
+
+describe('font preloads', () => {
+  it('preloads the hashed latin Inter and Space Grotesk files, crossorigin', () => {
+    const files = [
+      'main.abc.js',
+      'inter-latin-wght-normal.6c596dfc.woff2',
+      'inter-latin-ext-wght-normal.11111111.woff2',
+      'space-grotesk-latin-wght-normal.5a0c43ff.woff2',
+      'jetbrains-mono-latin-wght-normal.a865edea.woff2',
+    ];
+    const links = fontPreloads(files);
+    expect(links.split('<link').length - 1).toBe(2);
+    expect(links).toContain('href="/assets/inter-latin-wght-normal.6c596dfc.woff2" as="font" type="font/woff2" crossorigin');
+    expect(links).toContain('href="/assets/space-grotesk-latin-wght-normal.5a0c43ff.woff2"');
+    expect(links).not.toContain('latin-ext');
+    expect(links).not.toContain('jetbrains');
   });
 });

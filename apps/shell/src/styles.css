@@ -116,3 +116,12 @@
     transform: translate3d(-4%, 3%, 0) scale(1.08);
   }
 }
+
+/* Reserve the theme toggle's rendered box (w-16 h-9) until ui.js defines it, so the header
+   doesn't grow and push the page down when the component upgrades (CLS). */
+bf-theme-toggle:not(:defined) {
+  display: inline-block;
+  width: 4rem;
+  height: 2.25rem;
+  vertical-align: middle;
+}

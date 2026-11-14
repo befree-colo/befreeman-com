@@ -15,6 +15,17 @@ export interface RenderedPage {
   meta: PageMeta;
 }
 
+/** Fonts the first viewport renders with: preloading them avoids a fallback-font reflow (CLS). */
+export const PRELOAD_FONTS = ['inter-latin-wght-normal', 'space-grotesk-latin-wght-normal'] as const;
+
+/** `<link rel="preload">` tags for the built (hashed) font files among `assetFiles`. */
+export function fontPreloads(assetFiles: string[], base = '/assets/'): string {
+  return PRELOAD_FONTS.map((name) => assetFiles.find((f) => f.startsWith(`${name}.`) && f.endsWith('.woff2')))
+    .filter((f): f is string => !!f)
+    .map((f) => `<link rel="preload" href="${base}${f}" as="font" type="font/woff2" crossorigin />`)
+    .join('\n    ');
+}
+
 /** Fill the built shell template with one route's crawlable content. */
 export function renderPage(template: string, path: string, b: CareerContentBundle, site: string): RenderedPage {
   assertTemplate(template);

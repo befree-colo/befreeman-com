@@ -4,13 +4,13 @@
  * Env: SITE_URL (default https://befreeman.com)
  */
 import { existsSync } from 'node:fs';
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { CareerContentBundle } from '@befreeman/content';
 import { prerenderPaths } from '@befreeman/page-templates';
 import { renderOgImage } from './og';
-import { renderPage, robotsTxt, sitemapXml } from './render';
+import { fontPreloads, PRELOAD_FONTS, renderPage, robotsTxt, sitemapXml } from './render';
 
 const dist = fileURLToPath(new URL('../../../dist/', import.meta.url));
 const shellDir = join(dist, 'apps/shell');
@@ -22,7 +22,9 @@ const bundle = JSON.parse(await readFile(join(dist, 'libs/content', latest.file)
 // Keep the pristine template so re-running is idempotent.
 const templatePath = join(shellDir, 'index.template.html');
 if (!existsSync(templatePath)) await rename(join(shellDir, 'index.html'), templatePath);
-const template = await readFile(templatePath, 'utf8');
+const preloads = fontPreloads(await readdir(join(shellDir, 'assets')));
+if (preloads.split('<link').length - 1 !== PRELOAD_FONTS.length) throw new Error(`expected ${PRELOAD_FONTS.length} font files to preload in dist/apps/shell/assets`);
+const template = (await readFile(templatePath, 'utf8')).replace('<!--bf:head-->', `${preloads}\n    <!--bf:head-->`);
 
 const paths = prerenderPaths(bundle.achievements.map((a) => a.id));
 const images = new Map<string, { eyebrow: string; title: string; subtitle: string }>();

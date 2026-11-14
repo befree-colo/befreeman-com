@@ -60,3 +60,7 @@ playwright-report/
 graph.json
 *.tsbuildinfo
 .angular/
+
+# CI pnpm store (Bitbucket Pipelines cache)
+.pnpm-store/
+.lighthouseci/

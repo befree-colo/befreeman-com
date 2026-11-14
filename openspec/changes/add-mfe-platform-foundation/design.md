@@ -210,7 +210,8 @@ The shell owns the mode. On toggle it sets `data-theme` on `<html>`, persists th
 - **Contract tests**: each remote has a test that mounts it into JSDOM through the real `mount`, asserts that it renders, unmounts it, and asserts that it left nothing behind (no DOM, no bus listeners).
 - **Playwright e2e** against the composed build covers the cross-remote scenarios in the specs: deep links, focus propagation, failure isolation (via a blocked route), reduced motion, and the 375px viewport.
 - **axe-core** checks every page for WCAG 2.2 AA.
-- **Lighthouse CI** fails the build if CLS goes above 0.1.
+- **Lighthouse CI** (`nx run e2e:lighthouse`, against the compose server) fails the build if CLS goes above 0.1 on any page, or if a page exceeds its script or stylesheet budget. Each remote has its own page (`/achievements`, `/timeline`, `/skills`), so those page budgets act as per-remote JS budgets. Budgets live in `apps/e2e/budgets.json` and are measured uncompressed, because the compose server doesn't compress.
+- **Per-remote CSS budgets** are checked in Playwright (`tests/budgets.spec.ts`). Remotes compile their CSS into JS and adopt it into their shadow root, so Lighthouse only sees those bytes as script. The test measures the CSS in each shadow root.
 
 ### D15. Federation spike outcome (task 2.1, 2026-11-12)
 
