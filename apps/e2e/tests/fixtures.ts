@@ -6,7 +6,9 @@ import type { CareerContentBundle } from '@befreeman/content';
 const dist = fileURLToPath(new URL('../../../dist/', import.meta.url));
 
 export function loadBundle(): CareerContentBundle {
-  const latest = JSON.parse(readFileSync(`${dist}libs/content/content.latest.json`, 'utf8')) as { file: string };
+  const latest = JSON.parse(readFileSync(`${dist}libs/content/content.latest.json`, 'utf8')) as {
+    file: string;
+  };
   return JSON.parse(readFileSync(`${dist}libs/content/${latest.file}`, 'utf8')) as CareerContentBundle;
 }
 
@@ -27,3 +29,12 @@ export async function waitForShell(page: import('@playwright/test').Page): Promi
 }
 
 export { expect, dist };
+
+/** Scroll every remote slot into view (they mount lazily) and wait until each is mounted. */
+export async function waitForRemotes(page: import('@playwright/test').Page): Promise<void> {
+  const slots = await page.locator('[data-slot]').all();
+  for (const slot of slots) {
+    await slot.scrollIntoViewIfNeeded();
+    await expect(slot).toHaveAttribute('data-remote-state', 'mounted', { timeout: 15_000 });
+  }
+}

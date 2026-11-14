@@ -82,7 +82,7 @@
 
 ## 13. Integration verification
 
-- [ ] 13.1 Run the full Playwright suite against the composed site, both on the local compose server and through the local Worker (`wrangler dev`). It covers: all three remotes coexisting, deep links, cross-remote `entity:focus`, failure isolation (blocked remote route keeps the pre-rendered content and shows the notice), CSP enforcement, the reduced-motion profile, a 375px viewport with no horizontal scroll, a light/dark toggle updating every section together, and visual-regression screenshots showing the same `bf-button` variant identical in all three remotes. Verify all tests pass in both setups.
+- [x] 13.1 Run the full Playwright suite against the composed site, both on the local compose server and through the local Worker (`wrangler dev`). It covers: all three remotes coexisting, deep links, cross-remote `entity:focus`, failure isolation (blocked remote route keeps the pre-rendered content and shows the notice), CSP enforcement, the reduced-motion profile, a 375px viewport with no horizontal scroll, a light/dark toggle updating every section together, and visual-regression screenshots showing the same `bf-button` variant identical in all three remotes. Verify all tests pass in both setups.
 
 ## Workflow follow-up
 

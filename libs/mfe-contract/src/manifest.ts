@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zod';
 
 /**
  * The deployment manifest (`/mfe-manifest.json`). One JSON document, swapped

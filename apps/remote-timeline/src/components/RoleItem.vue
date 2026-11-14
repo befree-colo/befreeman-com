@@ -82,6 +82,9 @@ function enter(el: Element, done: () => void) {
                 <span class="block text-sm text-ink-muted">{{ a.summary }}</span>
               </li>
             </ul>
+            <p class="mt-4">
+              <bf-button variant="secondary" size="sm" :href="`/achievements?role=${role.id}`" data-testid="role-achievements" @click="store.navigate(`/achievements?role=${role.id}`, $event)">See achievements from this role</bf-button>
+            </p>
           </div>
         </div>
       </Transition>

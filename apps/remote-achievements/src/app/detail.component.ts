@@ -65,6 +65,17 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
             </bf-card>
           </section>
         }
+
+        <p class="mt-12">
+          <bf-button
+            variant="secondary"
+            size="sm"
+            [attr.href]="'/achievements?role=' + a.role"
+            data-testid="role-achievements"
+            (click)="store.navigate('/achievements?role=' + a.role, $event)"
+            >More achievements from this role</bf-button
+          >
+        </p>
       </article>
     } @else {
       <div class="py-16" data-testid="not-found">

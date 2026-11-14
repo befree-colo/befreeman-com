@@ -195,6 +195,19 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
                   ) : (
                     <p>No published achievements use this skill yet.</p>
                   )}
+                  {demonstrating.length ? (
+                    <p className="mt-4">
+                      <bf-button
+                        variant="secondary"
+                        size="sm"
+                        href={`/achievements?tech=${selectedSkill.id}`}
+                        data-testid="skill-achievements"
+                        onClick={go(`/achievements?tech=${selectedSkill.id}`)}
+                      >
+                        See achievements using {selectedSkill.name}
+                      </bf-button>
+                    </p>
+                  ) : null}
                 </bf-card>
               ) : (
                 <p className="text-ink-muted">Select a skill to see the achievements that demonstrate it.</p>
