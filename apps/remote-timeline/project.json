@@ -1,0 +1,37 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "remote-timeline",
+  "projectType": "application",
+  "sourceRoot": "apps/remote-timeline/src",
+  "tags": [
+    "type:remote",
+    "framework:vue"
+  ],
+  "targets": {
+    "build": {
+      "command": "vite build",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/remote-timeline"
+      ]
+    },
+    "typecheck": {
+      "command": "vue-tsc -p tsconfig.json --noEmit",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

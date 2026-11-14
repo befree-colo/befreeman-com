@@ -1,0 +1,67 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "ui-components",
+  "projectType": "library",
+  "sourceRoot": "libs/ui-components/src",
+  "tags": [
+    "type:lib"
+  ],
+  "targets": {
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "parallel": false,
+        "commands": [
+          "tsc -p tsconfig.json --noEmit",
+          "tsc -p test/typecheck/react/tsconfig.json",
+          "vue-tsc -p test/typecheck/vue/tsconfig.json --noEmit",
+          "ngc -p test/typecheck/angular/tsconfig.json"
+        ]
+      }
+    },
+    "manifest": {
+      "command": "cem analyze --litelement --globs \"src/components/*.ts\" --outdir . && tsx scripts/generate-types.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "{projectRoot}/src/components/**/*.ts",
+        "{projectRoot}/src/types.ts",
+        "{projectRoot}/scripts/**/*.ts"
+      ],
+      "outputs": [
+        "{projectRoot}/custom-elements.json",
+        "{projectRoot}/types"
+      ]
+    },
+    "build": {
+      "command": "vite build",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/libs/ui-components"
+      ]
+    },
+    "verify-artifact": {
+      "command": "tsx test/artifact/verify.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        "build"
+      ]
+    }
+  }
+}

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>befreeman.com</title>
+    <!--bf:head-->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script src="/theme-init.js"></script>
+  </head>
+  <body class="bg-surface text-ink antialiased">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div data-region="shell">
+      <span class="bf-arch-label" data-arch-shell>shell · host</span>
+      <header class="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur-md">
+        <nav class="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6" aria-label="Primary">
+          <a href="/" class="mr-auto inline-flex items-center gap-2 font-display text-lg font-bold text-ink no-underline">
+            <span class="grid size-8 place-items-center rounded-md bg-accent text-sm text-accent-ink" aria-hidden="true">BF</span>
+            <span data-brand><!--bf:brand-->befreeman.com</span>
+          </a>
+          <ul class="hidden items-center gap-5 sm:flex">
+            <li><a class="text-ink no-underline hover:text-accent" href="/achievements">Achievements</a></li>
+            <li><a class="text-ink no-underline hover:text-accent" href="/timeline">Timeline</a></li>
+            <li><a class="text-ink no-underline hover:text-accent" href="/skills">Skills</a></li>
+          </ul>
+          <button
+            type="button"
+            id="arch-toggle"
+            class="rounded-pill px-3 py-1.5 font-mono text-xs text-ink-muted ring-1 ring-border hover:text-ink hover:ring-accent aria-pressed:bg-accent aria-pressed:text-accent-ink"
+            aria-pressed="false"
+            title="Show how this page is composed"
+          >
+            &lt;/&gt;<span class="sr-only"> Architecture view</span>
+          </button>
+          <bf-theme-toggle></bf-theme-toggle>
+        </nav>
+      </header>
+      <main id="main" tabindex="-1" class="mx-auto max-w-6xl px-4 outline-none sm:px-6"><!--bf:main--></main>
+      <footer id="contact" class="border-t border-border bg-surface-sunken"><!--bf:footer--></footer>
+    </div>
+    <bf-dialog id="contact-dialog" close-label="Close contact dialog">
+      <span slot="heading">Get in touch</span>
+      <p>The fastest way to reach me:</p>
+      <div class="mt-4" data-contact-links></div>
+      <bf-button slot="footer" id="contact-email" hidden>Email me</bf-button>
+    </bf-dialog>
+  </body>
+</html>

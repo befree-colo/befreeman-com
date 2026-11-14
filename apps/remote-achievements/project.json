@@ -1,0 +1,34 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "remote-achievements",
+  "projectType": "application",
+  "sourceRoot": "apps/remote-achievements/src",
+  "tags": [
+    "type:remote",
+    "framework:angular"
+  ],
+  "targets": {
+    "build": {
+      "command": "rspack build -c rspack.config.mjs",
+      "options": {
+        "cwd": "{projectRoot}",
+        "env": {
+          "NODE_ENV": "production"
+        }
+      },
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/remote-achievements"
+      ]
+    },
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@befreeman/mfe-contract",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": ["./src/zod.ts"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./preview": "./src/preview.ts",
+    "./testing": "./src/testing.ts",
+    "./registry": "./src/registry.ts"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

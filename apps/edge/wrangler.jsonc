@@ -1,0 +1,28 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "befreeman-edge",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Shell + pre-rendered pages. The Worker runs first so every response gets security headers.
+  "assets": {
+    "directory": "../../dist/apps/shell",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash"
+  },
+  // Immutable, versioned artifacts: remotes/<name>/<version>/*, ui/<version>/*, content/*
+  "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "befreeman-artifacts" }],
+  // manifest:live and manifest:history:<timestamp>
+  "kv_namespaces": [{ "binding": "MANIFESTS", "id": "REPLACE_WITH_KV_NAMESPACE_ID" }],
+  // Secrets (wrangler secret put): PREVIEW_SECRET
+  "env": {
+    "staging": {
+      "name": "befreeman-edge-staging",
+      "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "befreeman-artifacts-staging" }],
+      "kv_namespaces": [{ "binding": "MANIFESTS", "id": "REPLACE_WITH_STAGING_KV_NAMESPACE_ID" }]
+    }
+  }
+}

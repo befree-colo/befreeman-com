@@ -1,0 +1,11 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "page-templates",
+  "projectType": "library",
+  "sourceRoot": "libs/page-templates/src",
+  "tags": ["type:lib"],
+  "targets": {
+    "test": { "command": "vitest run", "options": { "cwd": "{projectRoot}" } },
+    "typecheck": { "command": "tsc -p tsconfig.json --noEmit", "options": { "cwd": "{projectRoot}" } }
+  }
+}

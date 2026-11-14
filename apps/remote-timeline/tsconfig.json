@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node"], "jsx": "preserve" },
+  "include": ["src/**/*", "src/**/*.vue", "test/**/*.ts", "*.config.ts"],
+  "vueCompilerOptions": { "strictTemplates": true, "dataAttributes": ["data-*"] }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "design-system",
+  "projectType": "library",
+  "sourceRoot": "libs/design-system/src",
+  "tags": ["type:lib"],
+  "targets": {
+    "generate": {
+      "command": "tsx scripts/generate.ts",
+      "options": { "cwd": "{projectRoot}" },
+      "inputs": ["{projectRoot}/src/**/*.ts", "{projectRoot}/scripts/**/*.ts"],
+      "outputs": ["{projectRoot}/css"]
+    },
+    "test": {
+      "command": "vitest run",
+      "options": { "cwd": "{projectRoot}" }
+    },
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": { "cwd": "{projectRoot}" }
+    }
+  }
+}

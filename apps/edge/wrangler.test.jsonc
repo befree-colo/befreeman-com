@@ -1,0 +1,11 @@
+{
+  // Test-only config: same bindings as wrangler.jsonc, without the static-assets directory
+  // (tests stub ASSETS so they do not depend on a shell build).
+  "name": "befreeman-edge-test",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "test-artifacts" }],
+  "kv_namespaces": [{ "binding": "MANIFESTS", "id": "test-manifests" }],
+  "vars": { "PREVIEW_SECRET": "test-secret" }
+}

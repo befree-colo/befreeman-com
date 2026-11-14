@@ -1,0 +1,11 @@
+{
+  "$comment": "Uncompressed transfer bytes as served by the local compose server (Cloudflare compresses in production). Set ~15% above the sizes measured on 2026-11-13; raise deliberately, never to silence a regression.",
+  "cls": 0.1,
+  "pages": {
+    "home": { "scriptBytes": 690000, "stylesheetBytes": 54000 },
+    "achievements": { "scriptBytes": 690000, "stylesheetBytes": 54000 },
+    "timeline": { "scriptBytes": 575000, "stylesheetBytes": 54000 },
+    "skills": { "scriptBytes": 785000, "stylesheetBytes": 54000 }
+  },
+  "remoteCssBytes": { "achievements": 15000, "timeline": 20000, "skills": 14000 }
+}

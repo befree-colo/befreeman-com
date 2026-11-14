@@ -1,0 +1,14 @@
+{
+  "name": "@befreeman/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@befreeman/content": "workspace:*",
+    "@befreeman/mfe-contract": "workspace:*",
+    "@befreeman/page-templates": "workspace:*"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0"
+  }
+}

@@ -1,0 +1,16 @@
+packages:
+  - "apps/*"
+  - "libs/*"
+  - "tools/*"
+
+onlyBuiltDependencies:
+  - "@parcel/watcher"
+  - "@resvg/resvg-js"
+  - "@swc/core"
+  - "@tailwindcss/oxide"
+  - esbuild
+  - lmdb
+  - msgpackr-extract
+  - nx
+  - sharp
+  - workerd

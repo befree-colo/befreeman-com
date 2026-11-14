@@ -1,0 +1,17 @@
+{
+  "name": "@befreeman/remote-timeline",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "vue": "3.5.45",
+    "@befreeman/mfe-contract": "workspace:*",
+    "@befreeman/content": "workspace:*",
+    "@befreeman/design-system": "workspace:*",
+    "@befreeman/ui-components": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.11",
+    "vue-tsc": "^2.2.12"
+  }
+}

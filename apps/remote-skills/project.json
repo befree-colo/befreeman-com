@@ -1,0 +1,37 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "remote-skills",
+  "projectType": "application",
+  "sourceRoot": "apps/remote-skills/src",
+  "tags": [
+    "type:remote",
+    "framework:react"
+  ],
+  "targets": {
+    "build": {
+      "command": "rspack build -c rspack.config.mjs --mode production",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/remote-skills"
+      ]
+    },
+    "typecheck": {
+      "command": "tsc -p tsconfig.json --noEmit",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

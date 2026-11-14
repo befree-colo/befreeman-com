@@ -48,3 +48,19 @@ Thumbs.db
 *.mov
 *.wmv
 
+
+# Nx / tooling
+.nx/
+tmp/
+coverage/
+test-results/
+playwright-report/
+.wrangler/
+.dev.vars
+graph.json
+*.tsbuildinfo
+.angular/
+
+# CI pnpm store (Bitbucket Pipelines cache)
+.pnpm-store/
+.lighthouseci/

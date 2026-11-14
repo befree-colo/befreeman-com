@@ -1,0 +1,12 @@
+{
+  "name": "@befreeman/release",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@befreeman/mfe-contract": "workspace:*"
+  },
+  "devDependencies": {
+    "miniflare": "4.20260730.0"
+  }
+}

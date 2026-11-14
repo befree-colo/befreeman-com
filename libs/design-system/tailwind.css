@@ -1,0 +1,23 @@
+/*
+ * Shared Tailwind v4 entry. Every project's stylesheet starts with:
+ *
+ *   @import '@befreeman/design-system/tailwind.css';
+ *   @source '../src';            (paths relative to that stylesheet)
+ *
+ * Automatic source detection is off, so each project declares exactly what it scans
+ * and ships only the utilities it uses.
+ */
+@import 'tailwindcss' source(none);
+@import './css/theme.css';
+@import './css/base.css';
+
+/* Motion conventions: prefer the token-backed durations and easings. */
+@utility duration-token-fast {
+  transition-duration: var(--bf-duration-fast);
+}
+@utility duration-token-base {
+  transition-duration: var(--bf-duration-base);
+}
+@utility duration-token-slow {
+  transition-duration: var(--bf-duration-slow);
+}

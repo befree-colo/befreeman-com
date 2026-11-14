@@ -1,0 +1,81 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "e2e",
+  "projectType": "application",
+  "sourceRoot": "apps/e2e/src",
+  "tags": [
+    "type:e2e"
+  ],
+  "targets": {
+    "serve-composed": {
+      "command": "tsx src/compose-server.ts",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "remote-achievements",
+            "remote-timeline",
+            "remote-skills",
+            "ui-components"
+          ],
+          "target": "build"
+        },
+        {
+          "projects": [
+            "prerender"
+          ],
+          "target": "run"
+        }
+      ],
+      "continuous": true
+    },
+    "e2e": {
+      "command": "playwright test",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "remote-achievements",
+            "remote-timeline",
+            "remote-skills",
+            "ui-components"
+          ],
+          "target": "build"
+        },
+        {
+          "projects": [
+            "prerender"
+          ],
+          "target": "run"
+        }
+      ]
+    },
+    "lighthouse": {
+      "command": "lhci autorun --config=lighthouserc.cjs",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "dependsOn": [
+        {
+          "projects": [
+            "remote-achievements",
+            "remote-timeline",
+            "remote-skills",
+            "ui-components"
+          ],
+          "target": "build"
+        },
+        {
+          "projects": [
+            "prerender"
+          ],
+          "target": "run"
+        }
+      ]
+    }
+  }
+}
