@@ -36,7 +36,9 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
       if (type === 'skill' && skillById.has(id)) {
         setSelected(id);
         setActive(id);
-        buttons.current.get(id)?.scrollIntoView({ block: 'center', behavior: resolveMotion().reduced ? 'auto' : 'smooth' });
+        buttons.current
+          .get(id)
+          ?.scrollIntoView({ block: 'center', behavior: resolveMotion().reduced ? 'auto' : 'smooth' });
       }
     });
     const offTheme = bus.subscribe('theme:changed', ({ theme: t }) => setTheme(t));
@@ -79,13 +81,10 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
     return () => cancelAnimationFrame(frame);
   }, [model, theme, selected]);
 
-  const select = useCallback(
-    (id: string) => {
-      setSelected((cur) => (cur === id ? null : id));
-      setActive(id);
-    },
-    [],
-  );
+  const select = useCallback((id: string) => {
+    setSelected((cur) => (cur === id ? null : id));
+    setActive(id);
+  }, []);
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (!active) return;
@@ -113,7 +112,11 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
   return (
     <div className="text-ink" data-view={view}>
       <div className="mb-6 flex justify-end">
-        <div className="inline-flex rounded-pill bg-surface-sunken p-1 ring-1 ring-border" role="group" aria-label="Skills display">
+        <div
+          className="inline-flex rounded-pill bg-surface-sunken p-1 ring-1 ring-border"
+          role="group"
+          aria-label="Skills display"
+        >
           {(['radar', 'table'] as const).map((v) => (
             <button
               key={v}
@@ -138,7 +141,12 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
             style={{ width: '100%', maxWidth: SIZE }}
           />
           <div>
-            <div role="group" aria-label="Skills radar: use arrow keys to move between skills" onKeyDown={onKeyDown} data-testid="skill-group">
+            <div
+              role="group"
+              aria-label="Skills radar: use arrow keys to move between skills"
+              onKeyDown={onKeyDown}
+              data-testid="skill-group"
+            >
               {content.skillCategories.map((cat) => (
                 <section key={cat.id} className="mb-5">
                   <h3 className="mb-2 font-display text-lg font-bold">{cat.name}</h3>
@@ -162,11 +170,16 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
                           onClick={() => select(id)}
                           onFocus={() => setActive(id)}
                           className={`inline-flex items-center gap-2 rounded-pill px-3 py-1.5 text-sm font-medium ring-1 transition-colors duration-token-fast ${
-                            isSelected ? 'bg-accent text-accent-ink ring-accent' : 'bg-surface-raised text-ink ring-border hover:ring-accent'
+                            isSelected
+                              ? 'bg-accent text-accent-ink ring-accent'
+                              : 'bg-surface-raised text-ink ring-border hover:ring-accent'
                           }`}
                         >
                           {s.name}
-                          <span className="font-mono text-xs opacity-80" aria-label={`proficiency ${s.proficiency} of 5`}>
+                          <span
+                            className="font-mono text-xs opacity-80"
+                            aria-label={`proficiency ${s.proficiency} of 5`}
+                          >
                             {s.proficiency}/5
                           </span>
                         </button>
@@ -185,7 +198,11 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
                     <ul className="mt-2 space-y-2">
                       {demonstrating.map((a) => (
                         <li key={a.id}>
-                          <a href={`/achievements/${a.id}`} className="font-semibold" onClick={go(`/achievements/${a.id}`)}>
+                          <a
+                            href={`/achievements/${a.id}`}
+                            className="font-semibold"
+                            onClick={go(`/achievements/${a.id}`)}
+                          >
                             {a.title}
                           </a>
                           <span className="block text-sm">{roleById.get(a.role)?.company}</span>
@@ -217,14 +234,26 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
         </div>
       ) : (
         <table className="w-full border-collapse text-left" data-testid="skills-table">
-          <caption className="sr-only">Skills by category with proficiency and supporting achievements</caption>
+          <caption className="sr-only">
+            Skills by category with proficiency and supporting achievements
+          </caption>
           <thead>
             <tr className="border-b border-border text-sm text-ink-muted">
-              <th scope="col" className="py-2 pr-4">Skill</th>
-              <th scope="col" className="py-2 pr-4">Category</th>
-              <th scope="col" className="py-2 pr-4">Proficiency</th>
-              <th scope="col" className="py-2 pr-4">Years</th>
-              <th scope="col" className="py-2">Demonstrated in</th>
+              <th scope="col" className="py-2 pr-4">
+                Skill
+              </th>
+              <th scope="col" className="py-2 pr-4">
+                Category
+              </th>
+              <th scope="col" className="py-2 pr-4">
+                Proficiency
+              </th>
+              <th scope="col" className="py-2 pr-4">
+                Years
+              </th>
+              <th scope="col" className="py-2">
+                Demonstrated in
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -235,7 +264,9 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
                 const used = content.achievements.filter((a) => a.skills.includes(id));
                 return (
                   <tr key={id} className="border-b border-border align-top">
-                    <th scope="row" className="py-2 pr-4 font-semibold">{s.name}</th>
+                    <th scope="row" className="py-2 pr-4 font-semibold">
+                      {s.name}
+                    </th>
                     <td className="py-2 pr-4">{cat.name}</td>
                     <td className="py-2 pr-4">{s.proficiency} of 5</td>
                     <td className="py-2 pr-4">{s.years ?? '—'}</td>
@@ -244,7 +275,9 @@ export function SkillsApp({ content, bus, initialTheme, initialSelected }: Skill
                         ? used.map((a, i) => (
                             <span key={a.id}>
                               {i > 0 && ', '}
-                              <a href={`/achievements/${a.id}`} onClick={go(`/achievements/${a.id}`)}>{a.title}</a>
+                              <a href={`/achievements/${a.id}`} onClick={go(`/achievements/${a.id}`)}>
+                                {a.title}
+                              </a>
                             </span>
                           ))
                         : '—'}

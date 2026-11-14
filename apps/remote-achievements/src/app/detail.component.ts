@@ -11,11 +11,20 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
   template: `
     @if (store.current(); as a) {
       <article class="max-w-3xl" [attr.data-entity-id]="a.id" data-testid="achievement-detail">
-        <p class="mb-3"><a class="text-sm" href="/achievements" (click)="store.navigate('/achievements', $event)">← All achievements</a></p>
+        <p class="mb-3">
+          <a class="text-sm" href="/achievements" (click)="store.navigate('/achievements', $event)"
+            >← All achievements</a
+          >
+        </p>
         <h1 class="font-display text-4xl font-bold" [class.text-accent]="focused()">{{ a.title }}</h1>
         @if (role(); as r) {
           <p class="mt-3 text-ink-muted">
-            <a [href]="'/timeline#' + r.id" (click)="store.navigate('/timeline#' + r.id, $event)" data-testid="role-link">{{ r.title }} · {{ r.company }}</a>
+            <a
+              [href]="'/timeline#' + r.id"
+              (click)="store.navigate('/timeline#' + r.id, $event)"
+              data-testid="role-link"
+              >{{ r.title }} · {{ r.company }}</a
+            >
             @if (a.date) {
               <span> · {{ date() }}</span>
             }
@@ -26,14 +35,19 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
         <h2 class="mt-10 font-display text-2xl font-bold">Impact</h2>
         <ul class="mt-4 space-y-3" data-testid="impact">
           @for (i of a.impact; track i) {
-            <li class="flex gap-3"><span class="mt-2 size-2 shrink-0 rounded-pill bg-accent-2" aria-hidden="true"></span><span>{{ i }}</span></li>
+            <li class="flex gap-3">
+              <span class="mt-2 size-2 shrink-0 rounded-pill bg-accent-2" aria-hidden="true"></span
+              ><span>{{ i }}</span>
+            </li>
           }
         </ul>
 
         @if (a.metrics?.length) {
           <dl class="mt-8 grid gap-4 sm:grid-cols-2" data-testid="metrics">
             @for (m of a.metrics; track m.label) {
-              <div class="rounded-lg bg-surface-raised p-5 shadow-md ring-1 ring-border motion-safe:animate-rise">
+              <div
+                class="rounded-lg bg-surface-raised p-5 shadow-md ring-1 ring-border motion-safe:animate-rise"
+              >
                 <dt class="text-sm text-ink-muted">{{ m.label }}</dt>
                 <dd class="mt-1 font-display text-3xl font-bold text-accent">{{ m.value }}</dd>
               </div>
@@ -45,7 +59,11 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
         <ul class="mt-4 flex flex-wrap gap-2" data-testid="technologies">
           @for (id of a.skills; track id) {
             <li>
-              <a class="no-underline" [href]="'/skills#' + id" (click)="store.navigate('/skills#' + id, $event)">
+              <a
+                class="no-underline"
+                [href]="'/skills#' + id"
+                (click)="store.navigate('/skills#' + id, $event)"
+              >
                 <bf-chip>{{ store.skills().get(id)?.name ?? id }}</bf-chip>
               </a>
             </li>
@@ -53,7 +71,10 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
         </ul>
 
         @if (a.bodyHtml) {
-          <div class="mt-10 space-y-4 text-ink-muted [&_h2]:font-display [&_h2]:text-2xl [&_h2]:text-ink" [innerHTML]="a.bodyHtml"></div>
+          <div
+            class="mt-10 space-y-4 text-ink-muted [&_h2]:font-display [&_h2]:text-2xl [&_h2]:text-ink"
+            [innerHTML]="a.bodyHtml"
+          ></div>
         }
 
         @if (caseStudy(); as c) {
@@ -61,7 +82,10 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
             <bf-card variant="glow">
               <span slot="heading">Case study: {{ c.title }}</span>
               <span class="block">{{ c.summary }}</span>
-              <div class="mt-6 space-y-4 text-ink [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold" [innerHTML]="c.bodyHtml"></div>
+              <div
+                class="mt-6 space-y-4 text-ink [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-bold"
+                [innerHTML]="c.bodyHtml"
+              ></div>
             </bf-card>
           </section>
         }
@@ -81,7 +105,11 @@ const ym = (v: string | undefined) => (v ? `${MONTHS[Number(v.slice(5)) - 1]} ${
       <div class="py-16" data-testid="not-found">
         <h1 class="font-display text-4xl font-bold">Achievement not found</h1>
         <p class="mt-4 text-ink-muted">There is no achievement called “{{ store.subPath() }}”.</p>
-        <p class="mt-6"><bf-button href="/achievements" (click)="store.navigate('/achievements', $event)">See all achievements</bf-button></p>
+        <p class="mt-6">
+          <bf-button href="/achievements" (click)="store.navigate('/achievements', $event)"
+            >See all achievements</bf-button
+          >
+        </p>
       </div>
     }
   `,
