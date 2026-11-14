@@ -1,13 +1,15 @@
 ---
 name: Brian Freeman
-headline: Software Engineer & Architect
-valueStatement: I design and build distributed systems and frontend platforms that let teams ship fast without breaking things.
-location: United States
-email: contact@example.com
+headline: Principal Software Engineer
+valueStatement: I architect resilient, highly available systems and build web interfaces that are fast, accessible, and localized.
+location: Golden, Colorado
 links:
-  - { label: LinkedIn, url: "https://www.linkedin.com/", kind: linkedin }
-  - { label: GitHub, url: "https://github.com/", kind: github }
-placeholder: true
+  - { label: LinkedIn, url: "https://www.linkedin.com/in/befreeman/", kind: linkedin }
+  - { label: GitHub, url: "https://github.com/befree-colo/", kind: github }
+  - { label: Bitbucket, url: "https://bitbucket.org/befree/workspace/repositories/", kind: bitbucket }
+placeholder: true # LinkedIn and public Git URLs
 ---
-PLACEHOLDER — replace with your real summary. A few sentences on the kinds of systems you build, the scale you
-work at, and what teams gain from working with you.
+I'm a principal software engineer with more than two decades of experience architecting and delivering resilient
+on-premise and cloud-based solutions. My expertise spans high-availability systems, multi-system integration,
+advanced event processing, and robust security. I'm known for driving architectural improvements across teams and for
+building user-centric web interfaces that are responsive, accessible, and localized.

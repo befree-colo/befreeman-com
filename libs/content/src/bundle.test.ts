@@ -51,13 +51,15 @@ describe('bundle', () => {
     expect(warning).toBeNull();
   });
 
-  it('the repository content is valid and fully placeholder-marked until real content is imported', async () => {
+  it('the repository content is valid, and roles, achievements, and skills are real (not placeholders)', async () => {
     const bundle = await buildBundle(fileURLToPath(new URL('../content', import.meta.url)));
-    expect(bundle.roles).toHaveLength(3);
-    expect(bundle.achievements).toHaveLength(6);
-    expect(bundle.caseStudies).toHaveLength(1);
-    expect(bundle.skillCategories.length).toBeGreaterThanOrEqual(4);
-    const totalEntities = 1 + bundle.roles.length + bundle.achievements.length + bundle.caseStudies.length + bundle.skills.length;
-    expect(bundle.placeholders.total).toBe(totalEntities);
+    expect(bundle.roles.length).toBeGreaterThanOrEqual(1);
+    expect(bundle.achievements.some((a) => a.featured)).toBe(true);
+    expect(bundle.skillCategories.length).toBeGreaterThanOrEqual(3);
+    expect(bundle.placeholders.byType).toMatchObject({ role: 0, achievement: 0, skill: 0 });
+    // Newest first: by date, else by the role's start.
+    const start = new Map(bundle.roles.map((r) => [r.id, r.start]));
+    const when = bundle.achievements.map((a) => a.date ?? start.get(a.role)!);
+    expect(when).toEqual([...when].sort().reverse());
   });
 });

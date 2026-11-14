@@ -102,10 +102,12 @@ test.describe('achievements remote (Angular) in the composed site', () => {
     await page.goto('/achievements');
     await waitForShell(page);
     const live = page.locator('.bf-remote-host[data-remote="achievements"]');
-    await live.getByRole('button', { name: 'Angular' }).click();
-    await expect(page).toHaveURL('/achievements?tech=angular');
-    const count = bundle.achievements.filter((a) => a.skills.includes('angular')).length;
+    const tech = bundle.skills.find((s) => s.id === bundle.achievements[0]!.skills[0])!;
+    const chip = live.getByRole('button', { name: tech.name, exact: true });
+    await chip.click();
+    await expect(page).toHaveURL(`/achievements?tech=${tech.id}`);
+    const count = bundle.achievements.filter((a) => a.skills.includes(tech.id)).length;
     await expect(live.getByTestId('result-count')).toHaveText(`Showing ${count} of ${bundle.achievements.length} achievements`);
-    await expect(live.getByRole('button', { name: 'Angular' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(chip).toHaveAttribute('aria-pressed', 'true');
   });
 });

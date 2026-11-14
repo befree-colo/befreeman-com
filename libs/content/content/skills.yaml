@@ -1,26 +1,66 @@
-# PLACEHOLDER skills — replace with your real skills and honest proficiency (1-5).
+# Mirrors the resume's Technical Expertise section. Proficiency (1-5) is an estimate; review before launch.
 categories:
-  - id: architecture
-    name: Architecture
+  - id: languages-frameworks
+    name: Languages & Frameworks
     skills:
-      - { id: domain-driven-design, name: Domain-Driven Design, proficiency: 5, years: 10, placeholder: true }
-      - { id: event-driven-architecture, name: Event-Driven Architecture, proficiency: 5, years: 9, placeholder: true }
-      - { id: module-federation, name: Micro Frontends / Module Federation, proficiency: 4, years: 4, placeholder: true }
-  - id: frontend
-    name: Frontend
+      - { id: angular, name: Angular, proficiency: 4 }
+      - { id: css, name: CSS/SCSS, proficiency: 5 }
+      - { id: html5, name: HTML 5, proficiency: 5 }
+      - { id: java, name: Java, proficiency: 4 }
+      - { id: javascript, name: JavaScript, proficiency: 5 }
+      - { id: maven, name: Maven, proficiency: 4 }
+      - { id: pinia, name: Pinia, proficiency: 4 }
+      - { id: python, name: Python, proficiency: 3 }
+      - { id: react, name: React, proficiency: 2 }
+      - { id: rxjs, name: RxJS, proficiency: 3 }
+      - { id: spring-boot, name: Spring Boot, proficiency: 3 }
+      - { id: typescript, name: TypeScript, proficiency: 5 }
+      - { id: vite, name: Vite, proficiency: 4 }
+      - { id: vue, name: Vue, proficiency: 5 }
+      - { id: vuex, name: Vuex, proficiency: 4 }
+      - { id: webpack, name: Webpack, proficiency: 4 }
+  - id: core-concepts
+    name: Core Concepts
     skills:
-      - { id: angular, name: Angular, proficiency: 5, years: 9, placeholder: true }
-      - { id: react, name: React, proficiency: 4, years: 8, placeholder: true }
-      - { id: accessibility, name: Accessibility, proficiency: 4, years: 6, placeholder: true }
-      - { id: web-performance, name: Web Performance, proficiency: 4, years: 7, placeholder: true }
-  - id: backend
-    name: Backend & Languages
+      - { id: actor-model, name: Actor Model, proficiency: 3 }
+      - { id: agile, name: Agile, proficiency: 4 }
+      - { id: auth, name: Auth & AuthZ, proficiency: 4 }
+      - { id: ci-cd, name: CI/CD, proficiency: 5 }
+      - { id: concurrency, name: Concurrency, proficiency: 4 }
+      - { id: containerization, name: "Containerization (Docker, Kubernetes)", proficiency: 3 }
+      - { id: data-modeling, name: Data Modeling, proficiency: 4 }
+      - { id: dependency-injection, name: Dependency Injection, proficiency: 4 }
+      - { id: functional-programming, name: Functional Programming, proficiency: 4 }
+      - { id: i18n, name: i18n, proficiency: 4 }
+      - { id: micro-frontends, name: Micro Frontends, proficiency: 5 }
+      - { id: microservices, name: Microservices, proficiency: 4 }
+      - { id: monitoring, name: Monitoring, proficiency: 4 }
+      - { id: multithreading, name: Multithreading, proficiency: 4 }
+      - { id: ood, name: OOD, proficiency: 5 }
+      - { id: rest, name: REST, proficiency: 5 }
+      - { id: secure-coding, name: Secure Coding Practices, proficiency: 4 }
+      - { id: stream-processing, name: Stream Processing, proficiency: 4 }
+      - { id: tdd, name: TDD, proficiency: 5 }
+      - { id: web-accessibility, name: Web Accessibility (WCAG), proficiency: 4 }
+  - id: tools-platforms
+    name: Tools & Platforms
     skills:
-      - { id: typescript, name: TypeScript, proficiency: 5, years: 10, placeholder: true }
-      - { id: node-js, name: Node.js, proficiency: 4, years: 10, placeholder: true }
-  - id: cloud
-    name: Cloud & Platform
-    skills:
-      - { id: aws, name: AWS, proficiency: 4, years: 8, placeholder: true }
-      - { id: kubernetes, name: Kubernetes, proficiency: 3, years: 5, placeholder: true }
-      - { id: cloudflare, name: Cloudflare, proficiency: 4, years: 3, placeholder: true }
+      - { id: atlassian, name: Atlassian Suite, proficiency: 4 }
+      - { id: claude-code, name: Claude Code, proficiency: 4 }
+      - { id: cypress, name: Cypress, proficiency: 4 }
+      - { id: git, name: Git, proficiency: 5 }
+      - { id: gcp, name: Google Cloud Platform (GCP), proficiency: 3 }
+      - { id: gradle, name: Gradle, proficiency: 3 }
+      - { id: jenkins, name: Jenkins, proficiency: 4 }
+      - { id: macos, name: macOS, proficiency: 4 }
+      - { id: mongodb, name: MongoDB, proficiency: 3 }
+      - { id: mockito, name: Mockito, proficiency: 3 }
+      - { id: node-js, name: NodeJS/NPM, proficiency: 4 }
+      - { id: postgresql, name: PostgreSQL, proficiency: 3 }
+      - { id: rabbitmq, name: RabbitMQ, proficiency: 3 }
+      - { id: selenium, name: Selenium, proficiency: 3 }
+      - { id: sentry, name: Sentry, proficiency: 4 }
+      - { id: sonarqube, name: SonarQube, proficiency: 3 }
+      - { id: vmware, name: VMware vSphere & vRealize, proficiency: 4 }
+      - { id: windows, name: Windows, proficiency: 4 }
+      - { id: linux, name: Linux, proficiency: 4 }

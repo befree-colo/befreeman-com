@@ -36,7 +36,7 @@ Dates are `YYYY-MM`.
 | `name`, `headline`, `valueStatement` | yes | shown in the hero |
 | `location` | no | |
 | `email` | no | **never published in plain text**; the bundle only contains an obfuscated token used by the contact button |
-| `links` | no | list of `{ label, url, kind }`; `kind` is `linkedin`, `github`, `website`, or `other` |
+| `links` | no | list of `{ label, url, kind }`; `kind` is `linkedin`, `github`, `bitbucket`, `website`, or `other` |
 | body | no | your longer summary |
 
 ### `roles/<id>.md`
@@ -95,13 +95,13 @@ The build fails when:
 
 ## Replacing placeholders
 
-The starter content is fictional. Every starter entity has `placeholder: true`, and each production build prints:
+Any entity that still holds stand-in text has `placeholder: true`, and each production build counts them:
 
 ```
-⚠ 23 placeholder content entities remain (profile: 1, role: 3, achievement: 6, caseStudy: 1, skill: 12). Replace them before launch.
+⚠ 2 placeholder content entities remain (profile: 1, caseStudy: 1). Replace them before launch.
 ```
 
-To replace one, edit the file with your real details and **delete the `placeholder: true` line**. To remove a starter entity, delete its file and any references to it. The validator will tell you if something still points at it. When the warning disappears, the content is launch-ready.
+To replace one, edit the file with your real details and **delete the `placeholder: true` line**. To remove an entity, delete its file and any references to it. The validator will tell you if something still points at it. When the warning disappears, the content is launch-ready.
 
 ## Example: adding an achievement
 
@@ -111,8 +111,8 @@ Create `libs/content/content/achievements/zero-downtime-db-upgrade.md`:
 ---
 title: Zero-downtime database upgrade
 summary: Upgraded the primary Postgres cluster across two major versions with no customer-visible downtime.
-role: northwind-principal-architect
-skills: [aws]
+role: liveperson-principal-engineer
+skills: [postgresql]
 impact:
   - Completed the upgrade with zero downtime and no data loss
 metrics:
