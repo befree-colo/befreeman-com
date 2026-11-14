@@ -77,7 +77,7 @@
 
 ## 12. CI on Bitbucket Cloud Pipelines (free plan)
 
-- [ ] 12.1 Add `bitbucket-pipelines.yml` with a pull-request pipeline that runs `nx affected -t lint typecheck test build --base=origin/$BITBUCKET_PR_DESTINATION_BRANCH` in the Playwright image, with full clone depth and pnpm and Nx caches. Verify locally that the same command, after changing only the timeline, runs only the timeline and its dependents; then verify the pipeline passes on a Bitbucket PR.
+- [x] 12.1 Add `bitbucket-pipelines.yml` with a pull-request pipeline that runs `nx affected -t lint typecheck test build --base=origin/$BITBUCKET_PR_DESTINATION_BRANCH` in the Playwright image, with full clone depth and pnpm and Nx caches. Verify locally that the same command, after changing only the timeline, runs only the timeline and its dependents; then verify the pipeline passes on a Bitbucket PR.
 - [ ] 12.2 Add a `main` branch pipeline and a manual `full` custom pipeline that run the Playwright suite (including the axe audits) and Lighthouse CI against the local compose server, with CLS ≤ 0.1 and per-remote JS and CSS budgets. Verify locally that Lighthouse CI fails on a deliberately exceeded budget and the axe canary fails on a deliberate violation; then verify the `main` pipeline passes on Bitbucket.
 
 ## 13. Integration verification
