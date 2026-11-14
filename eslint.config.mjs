@@ -8,7 +8,7 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist', '**/node_modules', '**/.nx', '**/tmp', '**/.wrangler', '**/test-results', '**/playwright-report'],
+    ignores: ['**/dist', '**/node_modules', '**/.nx', '**/tmp', '**/.wrangler', '**/test-results', '**/playwright-report', '**/.pnpm-store', '**/.lighthouseci'],
   },
   ...pluginVue.configs['flat/recommended'].map((c) => ({ ...c, files: ['**/*.vue'] })),
   {

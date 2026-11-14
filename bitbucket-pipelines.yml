@@ -1,7 +1,7 @@
 # CI for befreeman.com on Bitbucket Cloud Pipelines (free plan: 50 build minutes/month).
 # Work is scaled to the trigger (design D16 in openspec/changes/add-mfe-platform-foundation):
 #   pull requests  -> affected lint/typecheck/test/build only (no e2e)
-#   main           -> affected checks, then Playwright (with axe) and Lighthouse CI
+#   main           -> all checks, then Playwright (with axe) and Lighthouse CI
 #   custom: full   -> everything, on demand
 # Nothing here needs Cloudflare: e2e and Lighthouse run against the local compose server.
 # Deployment steps (staging/production) arrive with the deploy-to-cloudflare change.
@@ -21,11 +21,9 @@ definitions:
         files:
           - pnpm-lock.yaml
       path: .pnpm-store
-    nx:
-      key:
-        files:
-          - pnpm-lock.yaml
-      path: .nx/cache
+    # No Nx cache: Bitbucket saves a keyed cache once and never refreshes it while the key
+    # exists, so a cached .nx would go stale after the first run. Scoping comes from
+    # `nx affected` on PRs instead.
 
   steps:
     - step: &e2e-reports
@@ -40,7 +38,7 @@ pipelines:
     '**':
       - step:
           name: Affected checks (lint, typecheck, test, build)
-          caches: [pnpm, nx]
+          caches: [pnpm]
           script:
             - export NX_DAEMON=false NX_NO_CLOUD=true
             - ./tools/ci/setup.sh
@@ -51,12 +49,14 @@ pipelines:
     main:
       - step:
           <<: *e2e-reports
-          name: Affected checks, e2e (axe), Lighthouse CI
-          caches: [pnpm, nx]
+          name: All checks, e2e (axe), Lighthouse CI
+          caches: [pnpm]
           script:
             - export NX_DAEMON=false NX_NO_CLOUD=true
             - ./tools/ci/setup.sh
-            - pnpm nx affected -t lint typecheck test build --base=HEAD~1 --head=HEAD
+            # All projects, not `affected --base=HEAD~1`: a fast-forward or multi-commit push
+            # would skip projects changed in earlier commits. One run per merge (~3 min).
+            - pnpm nx run-many -t lint typecheck test build
             - pnpm nx run e2e:e2e
             - pnpm nx run e2e:lighthouse
 
@@ -65,7 +65,7 @@ pipelines:
       - step:
           <<: *e2e-reports
           name: Everything (all checks, e2e, Lighthouse CI)
-          caches: [pnpm, nx]
+          caches: [pnpm]
           script:
             - export NX_DAEMON=false NX_NO_CLOUD=true
             - ./tools/ci/setup.sh

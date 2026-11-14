@@ -245,12 +245,13 @@ The repository is hosted on Bitbucket Cloud, so CI is `bitbucket-pipelines.yml`.
 | Trigger | Runs |
 |---|---|
 | `pull-requests: '**'` | `nx affected -t lint typecheck test build --base=origin/$BITBUCKET_PR_DESTINATION_BRANCH`; no e2e |
-| `branches: main` | affected checks against `HEAD~1`, then the Playwright suite (with axe audits) and Lighthouse CI against the local compose server |
+| `branches: main` | `run-many` for all checks, then the Playwright suite (with axe audits) and Lighthouse CI against the local compose server. It runs once per merge, and `affected --base=HEAD~1` would miss projects changed in earlier commits of a fast-forward or multi-commit push. |
 | `custom: full` (manual) | everything: `run-many` for all targets, plus e2e and Lighthouse CI |
 | deployment steps (follow-up change) | on `main`: publish and promote to the `staging` deployment environment; `production` behind `trigger: manual` |
 
-- **Image**: the official Playwright image (`mcr.microsoft.com/playwright:v1.65.0-noble`), so Chromium and its system dependencies are preinstalled; pnpm is installed in the step.
-- **Caching**: custom caches for the pnpm store and `.nx/cache`, keyed on `pnpm-lock.yaml`, so unchanged projects are nearly free.
+- **Image**: the official Playwright image (`mcr.microsoft.com/playwright:v1.65.0-noble`), so Chromium and its system dependencies are preinstalled. The image ships Node 26, which no longer bundles Corepack, so `tools/ci/setup.sh` installs the pnpm version pinned in `packageManager` with npm.
+- **Caching**: a custom cache for the pnpm store, keyed on `pnpm-lock.yaml`. There's no Nx cache: Bitbucket saves a keyed cache once and never refreshes it while the key exists, so `.nx` would go stale after the first run, and there's no remote cache. On PRs, scoping comes from `nx affected`. A full cold run measured 166 s in the CI image (2026-11-13).
+- **Affected scope, verified locally (2026-11-13)**: on a scratch branch whose only commit touched `apps/remote-timeline`, `nx show projects --affected` returned only `remote-timeline`. `nx affected -t lint typecheck test build` ran that project's targets plus its build dependencies (`content:bundle`, `ui-components:build`). Nothing depends on a remote at build time, because remotes are composed at runtime.
 - **Clone depth**: `clone: depth: full`, which `nx affected` needs to compare against the base branch.
 - **Secrets**: Cloudflare credentials and `PREVIEW_SECRET` become secured deployment variables on the `staging` and `production` environments; no CI step before deployment needs them.
 - **No Cloudflare in CI checks**: e2e, axe, and Lighthouse run against the local compose server, so CI is useful before any cloud resources exist.
