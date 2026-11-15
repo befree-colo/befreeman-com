@@ -34,7 +34,7 @@ test.describe('shell layout', () => {
     // Slotted (light DOM) content belongs to the <bf-dialog> host, not the native <dialog> in its shadow root.
     const host = page.locator('#contact-dialog');
     for (const l of bundle.profile.links) await expect(host.getByRole('link', { name: l.label })).toBeVisible();
-    await expect(host.getByRole('button', { name: 'Email me' })).toBeVisible();
+    await expect(host.getByRole('button', { name: 'Email me' })).toHaveCount(bundle.profile.contactToken ? 1 : 0);
     const html = await page.evaluate(() => {
       const parts = [document.documentElement.outerHTML];
       for (const el of document.querySelectorAll('*')) if (el.shadowRoot) parts.push(el.shadowRoot.innerHTML);

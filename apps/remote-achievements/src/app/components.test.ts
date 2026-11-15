@@ -30,11 +30,12 @@ describe('achievement list', () => {
 
   it('filters by technology and reflects it in the URL via nav:request (replace)', async () => {
     const b = await content();
+    const tech = b.achievements[0]!.skills[0]!;
     const m = await mountAt('/achievements');
-    await toggleChip(m.el, 'angular');
-    const expected = b.achievements.filter((a) => a.skills.includes('angular'));
+    await toggleChip(m.el, tech);
+    const expected = b.achievements.filter((a) => a.skills.includes(tech));
     expect(cards(m.el).map((c) => c.getAttribute('data-entity-id'))).toEqual(expected.map((a) => a.id));
-    expect(m.bus.published.at(-1)).toEqual({ name: 'nav:request', payload: { path: '/achievements?tech=angular', replace: true } });
+    expect(m.bus.published.at(-1)).toEqual({ name: 'nav:request', payload: { path: `/achievements?tech=${tech}`, replace: true } });
   });
 
   it('filters by role, combines with technology, and clears', async () => {

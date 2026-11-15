@@ -11,7 +11,7 @@ test.describe('crawlable without JavaScript', () => {
     expect(res?.status()).toBe(200);
     await expect(page.getByRole('heading', { level: 1, name: bundle.profile.name })).toBeVisible();
     await expect(page.getByText(bundle.profile.valueStatement)).toBeVisible();
-    for (const r of bundle.roles) await expect(page.getByRole('heading', { name: r.title })).toBeVisible();
+    for (const r of bundle.roles) await expect(page.getByRole('heading', { name: r.title, exact: true })).toBeVisible();
     for (const a of bundle.achievements.filter((x) => x.featured)) await expect(page.getByRole('heading', { name: a.title })).toBeVisible();
   });
 
@@ -27,7 +27,7 @@ test.describe('crawlable without JavaScript', () => {
 
   test('timeline and skills pages carry their content', async ({ page }) => {
     await page.goto('/timeline');
-    for (const r of bundle.roles) await expect(page.getByRole('heading', { name: r.title })).toBeVisible();
+    for (const r of bundle.roles) await expect(page.getByRole('heading', { name: r.title, exact: true })).toBeVisible();
     await page.goto('/skills');
     for (const s of bundle.skills) await expect(page.getByText(s.name, { exact: true })).toBeVisible();
   });

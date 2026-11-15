@@ -7,7 +7,7 @@ const budgets = require('./budgets.json');
 
 const port = process.env.LHCI_PORT ?? '4310';
 const base = `http://localhost:${port}`;
-const achievement = process.env.LHCI_ACHIEVEMENT ?? 'angular-modernization';
+const achievement = process.env.LHCI_ACHIEVEMENT ?? 'first-contentful-paint';
 
 const pageBudget = (b) => ({
   'resource-summary:script:size': ['error', { maxNumericValue: b.scriptBytes }],

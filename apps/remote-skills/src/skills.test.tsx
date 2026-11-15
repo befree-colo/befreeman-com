@@ -121,15 +121,15 @@ describe('skills radar', () => {
 describe('entity:focus and theme:changed', () => {
   it('entity:focus selects and scrolls to the skill', async () => {
     const m = await mountAt();
-    await run(() => void getBus('agent').publish('entity:focus', { type: 'skill', id: 'aws' }));
-    expect(skillButton(m.el, 'aws').getAttribute('aria-pressed')).toBe('true');
+    await run(() => void getBus('agent').publish('entity:focus', { type: 'skill', id: 'java' }));
+    expect(skillButton(m.el, 'java').getAttribute('aria-pressed')).toBe('true');
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
-    expect(m.el.querySelector<HTMLCanvasElement>('[data-testid="radar-canvas"]')!.dataset['selected']).toBe('aws');
+    expect(m.el.querySelector<HTMLCanvasElement>('[data-testid="radar-canvas"]')!.dataset['selected']).toBe('java');
   });
 
   it('ignores focus on entities it does not display', async () => {
     const m = await mountAt();
-    await run(() => void getBus('x').publish('entity:focus', { type: 'role', id: 'aws' }));
+    await run(() => void getBus('x').publish('entity:focus', { type: 'role', id: 'java' }));
     await run(() => void getBus('x').publish('entity:focus', { type: 'skill', id: 'cobol' }));
     expect(m.el.querySelectorAll('button[aria-pressed="true"][data-skill]')).toHaveLength(0);
   });
@@ -145,8 +145,8 @@ describe('entity:focus and theme:changed', () => {
   });
 
   it('a /skills#<id> deep link preselects the skill', async () => {
-    history.replaceState({}, '', '/skills#kubernetes');
+    history.replaceState({}, '', '/skills#containerization');
     const m = await mountAt();
-    expect(skillButton(m.el, 'kubernetes').getAttribute('aria-pressed')).toBe('true');
+    expect(skillButton(m.el, 'containerization').getAttribute('aria-pressed')).toBe('true');
   });
 });

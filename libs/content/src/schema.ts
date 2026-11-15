@@ -14,7 +14,7 @@ const placeholder = z.boolean().default(false);
 export const linkSchema = z.object({
   label: z.string().min(1),
   url: z.url(),
-  kind: z.enum(['linkedin', 'github', 'website', 'other']),
+  kind: z.enum(['linkedin', 'github', 'bitbucket', 'website', 'other']),
 });
 
 export const profileSchema = z.object({

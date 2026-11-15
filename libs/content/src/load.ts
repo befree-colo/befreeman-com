@@ -141,10 +141,14 @@ export async function loadContent(contentDir: string): Promise<LoadResult> {
     throw new ContentValidationError(issues);
   }
 
+  const newestFirst = (a: string, b: string) => (a < b ? 1 : a > b ? -1 : 0);
+  // Achievements without a date sort by their role's start (stable, so file order breaks ties).
+  const roleStart = new Map(roles.map((r) => [r.id, r.start]));
+  const when = (a: Achievement) => a.date ?? roleStart.get(a.role) ?? '';
   const content: UnversionedBundle = {
     profile,
-    roles: roles.sort((a, b) => (a.start < b.start ? 1 : a.start > b.start ? -1 : 0)),
-    achievements,
+    roles: roles.sort((a, b) => newestFirst(a.start, b.start)),
+    achievements: achievements.sort((a, b) => newestFirst(when(a), when(b))),
     caseStudies,
     skills,
     skillCategories,
