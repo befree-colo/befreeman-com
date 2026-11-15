@@ -168,3 +168,77 @@ describe('signed preview override (?mfe-override)', () => {
     expect((await call('/skills?mfe-override=timeline@1.1.0-b')).headers.get('set-cookie')).toBeNull();
   });
 });
+
+describe('canonical host: noindex elsewhere (discoverability)', () => {
+  const STAGING = 'https://befreeman-edge-staging.example.workers.dev';
+  const at = (origin: string, path: string) => worker.fetch(new Request(`${origin}${path}`), testEnv());
+
+  it.each([
+    ['HTML page', '/'],
+    ['asset 404 page', '/nope'],
+    ['manifest', '/mfe-manifest.json'],
+    ['versioned artifact', '/remotes/timeline/1.0.0-a/remoteEntry.js'],
+    ['missing artifact', '/remotes/timeline/9.9.9-z/remoteEntry.js'],
+    ['reserved /api', '/api/anything'],
+  ])('a staging host gets X-Robots-Tag: noindex on the %s', async (_label, path) => {
+    const res = await at(STAGING, path);
+    expect(res.headers.get('x-robots-tag')).toBe('noindex');
+    expect(res.headers.get('content-security-policy')).toContain("default-src 'self'");
+  });
+
+  it.each(['/', '/nope', '/mfe-manifest.json', '/remotes/timeline/1.0.0-a/remoteEntry.js'])(
+    'befreeman.com never gets noindex (%s)',
+    async (path) => {
+      expect((await at(ORIGIN, path)).headers.get('x-robots-tag')).toBeNull();
+    },
+  );
+
+  it('falls back to befreeman.com when CANONICAL_HOST is unset', async () => {
+    const env2 = { ...testEnv(), CANONICAL_HOST: undefined };
+    expect((await worker.fetch(new Request(`${ORIGIN}/`), env2)).headers.get('x-robots-tag')).toBeNull();
+    expect((await worker.fetch(new Request(`${STAGING}/`), env2)).headers.get('x-robots-tag')).toBe(
+      'noindex',
+    );
+  });
+});
+
+describe('canonical host: www and http redirects (site-hosting)', () => {
+  const get = (url: string, method = 'GET') =>
+    worker.fetch(new Request(url, { method, redirect: 'manual' }), testEnv());
+
+  it('www → apex with path and query preserved (301)', async () => {
+    const res = await get('https://www.befreeman.com/achievements/first-contentful-paint?tech=vue&x=1');
+    expect(res.status).toBe(301);
+    expect(res.headers.get('location')).toBe(
+      'https://befreeman.com/achievements/first-contentful-paint?tech=vue&x=1',
+    );
+  });
+
+  it('http on the canonical host → https (301)', async () => {
+    const res = await get('http://befreeman.com/skills?a=b');
+    expect(res.status).toBe(301);
+    expect(res.headers.get('location')).toBe('https://befreeman.com/skills?a=b');
+  });
+
+  it('http://www goes straight to the https apex in one hop', async () => {
+    const res = await get('http://www.befreeman.com/');
+    expect(res.headers.get('location')).toBe('https://befreeman.com/');
+  });
+
+  it('redirects any method, before method checks', async () => {
+    expect((await get('https://www.befreeman.com/', 'POST')).status).toBe(301);
+  });
+
+  it('redirect responses carry the security headers, and www is noindex', async () => {
+    const res = await get('https://www.befreeman.com/');
+    expect(res.headers.get('strict-transport-security')).toContain('max-age=');
+    expect(res.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
+    expect(res.headers.get('x-robots-tag')).toBe('noindex');
+  });
+
+  it('https apex and other hosts are not redirected', async () => {
+    expect((await get('https://befreeman.com/')).status).toBe(200);
+    expect((await get('https://befreeman-edge-staging.example.workers.dev/')).status).toBe(200);
+    expect((await get('http://localhost:8787/')).status).toBe(200);
+  });
+});

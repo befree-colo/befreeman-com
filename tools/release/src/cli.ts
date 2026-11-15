@@ -7,8 +7,12 @@
  *   release init --ui <v> --content <v> [--remote <name>@<v> ...]
  *   release status
  *   release preview-link <name> <version>   (prints a signed preview query string; needs PREVIEW_SECRET)
+ *   release deploy --env <staging|production> --base-url <url> [--all]
+ *       plan (affected since the env's deploy:commit) → build → publish → promote → wrangler deploy → record commit.
+ *       Production refuses a commit that staging has not verified.
+ *   release mark-verified --env staging   (records that HEAD passed e2e on staging)
  *
- * Targets: --local (default; the storage `wrangler dev` serves) or --remote [--env staging].
+ * Targets: --local (default; the storage `wrangler dev` serves) or --remote [--env staging|production].
  * Smoke checks need PREVIEW_SECRET (same value as the Worker secret). `--skip-smoke` exists
  * only for rollback drills and prints a warning.
  */
@@ -23,6 +27,8 @@ import type { ArtifactName, SmokeCheck } from './release';
 import { playwrightSmoke } from './smoke';
 import { signPreview } from '@befreeman/mfe-contract/preview';
 import { wranglerStores } from './stores';
+import { DEPLOY_COMMIT, PROJECT_ARTIFACTS, deploy, markVerified } from './deploy';
+import type { DeployPart } from './deploy';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const EDGE = join(ROOT, 'apps/edge');
@@ -41,13 +47,21 @@ const { values, positionals } = parseArgs({
     'remote-version': { type: 'string', multiple: true },
     'skip-smoke': { type: 'boolean', default: false },
     dist: { type: 'string' },
+    all: { type: 'boolean', default: false },
   },
 });
 
 const [command, name, version] = positionals;
 const mode = values.remote ? 'remote' : 'local';
-const bucket = values.env === 'staging' ? 'befreeman-artifacts-staging' : 'befreeman-artifacts';
-const stores = wranglerStores({ cwd: EDGE, bucket, mode, ...(values.env ? { env: values.env } : {}) });
+if (values.env && values.env !== 'staging' && values.env !== 'production') {
+  console.error(`✖ --env must be staging or production (got "${values.env}")`);
+  process.exit(1);
+}
+/** Wrangler environment name: staging is a named env; production is the top-level config. */
+const wranglerEnv = values.env === 'staging' ? 'staging' : undefined;
+const storesFor = (env: string | undefined) =>
+  wranglerStores({ cwd: EDGE, bucket: env === 'staging' ? 'befreeman-artifacts-staging' : 'befreeman-artifacts', mode, ...(env ? { env } : {}) });
+const stores = storesFor(wranglerEnv);
 
 function defaultVersion(project: string): string {
   const pkg = JSON.parse(readFileSync(join(ROOT, project, 'package.json'), 'utf8')) as { version?: string };
@@ -146,8 +160,63 @@ async function main() {
       console.log(`${page}?${new URLSearchParams(await signPreview([{ name, version }], secret, 3600)).toString()}`);
       return;
     }
+    case 'deploy': {
+      if (values.env !== 'staging' && values.env !== 'production') throw new ReleaseError('deploy needs --env staging|production', 'invalid');
+      const git = (args: string[]) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
+      if (mode === 'remote' && git(['status', '--porcelain'])) throw new ReleaseError('refusing to deploy a dirty working tree; commit first', 'invalid');
+      const sh = (cmd: string, args: string[], cwd = ROOT) => execFileSync(cmd, args, { cwd, stdio: 'inherit' });
+      const toProject = new Map(Object.entries(PROJECT_ARTIFACTS).map(([project, part]) => [part, project]));
+      const result = await deploy({
+        stores,
+        stagingStores: storesFor('staging'),
+        env: values.env,
+        head: git(['rev-parse', 'HEAD']),
+        all: values.all,
+        affected: async (base) => {
+          try {
+            git(['cat-file', '-e', `${base}^{commit}`]);
+          } catch {
+            return null;
+          }
+          const out = execFileSync('pnpm', ['exec', 'nx', 'show', 'projects', '--affected', `--base=${base}`, '--head=HEAD', '--json'], {
+            cwd: ROOT,
+            encoding: 'utf8',
+            env: { ...process.env, NX_DAEMON: 'false' },
+          });
+          return JSON.parse(out) as string[];
+        },
+        build: async (parts: DeployPart[]) => {
+          const projects = parts.flatMap((p) => (p === 'content' ? [] : (toProject.get(p) ?? [])));
+          if (projects.length) sh('pnpm', ['exec', 'nx', 'run-many', '-t', 'build', '-p', projects.join(',')]);
+          // Always: the shell and pre-rendered pages (embeds content; builds the content bundle too).
+          sh('pnpm', ['exec', 'nx', 'run', 'prerender:run']);
+        },
+        versionFor: (part) => defaultVersion(projectFor(part)),
+        distFor,
+        contentDir: join(ROOT, CONTENT_DIST),
+        smoke: smokeFor(),
+        deployWorker: async () => {
+          if (mode === 'local') {
+            console.log('↷ --local: skipping wrangler deploy (wrangler dev serves dist/apps/shell directly)');
+            return;
+          }
+          sh('pnpm', ['exec', 'wrangler', 'deploy', `--env=${wranglerEnv ?? ''}`], EDGE);
+        },
+        log: (m) => console.log(`[deploy] ${m}`),
+      });
+      console.log(`✔ deployed ${result.plan.length ? result.plan.join(', ') : 'Worker only'} to ${values.env}${result.promoted.length ? ` (promoted ${result.promoted.join(', ')})` : ''}`);
+      return;
+    }
+    case 'mark-verified': {
+      if (values.env !== 'staging') throw new ReleaseError('mark-verified only applies to --env staging', 'invalid');
+      const head = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
+      await markVerified(stores, head);
+      console.log(`✔ ${head.slice(0, 7)} verified on staging; it may now be deployed to production`);
+      return;
+    }
     case 'status': {
       console.log(JSON.stringify(await readLive(stores), null, 2));
+      console.log(`${DEPLOY_COMMIT}: ${(await stores.manifests.get(DEPLOY_COMMIT)) ?? '(none)'}`);
       return;
     }
     default:
