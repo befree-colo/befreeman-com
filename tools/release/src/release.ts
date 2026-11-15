@@ -13,7 +13,7 @@ export type ArtifactName = keyof typeof REMOTE_REGISTRY | 'ui';
 export class ReleaseError extends Error {
   constructor(
     message: string,
-    readonly code: 'duplicate-version' | 'not-published' | 'smoke-failed' | 'no-live-manifest' | 'nothing-to-roll-back' | 'invalid',
+    readonly code: 'duplicate-version' | 'not-published' | 'smoke-failed' | 'no-live-manifest' | 'nothing-to-roll-back' | 'not-verified' | 'invalid',
   ) {
     super(message);
     this.name = 'ReleaseError';

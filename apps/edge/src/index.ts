@@ -1,5 +1,5 @@
 import { PREVIEW_PARAMS, verifyPreview } from '@befreeman/mfe-contract/preview';
-import type { Env } from './env';
+import { DEFAULT_CANONICAL_HOST, type Env } from './env';
 import { IMMUTABLE, contentTypeFor, withSecurityHeaders } from './headers';
 import { PREVIEW_COOKIE, applyPreview, etagFor, previewParams, readLiveManifest } from './manifest';
 
@@ -49,31 +49,50 @@ async function previewCookie(request: Request, env: Env): Promise<string | null>
   return `${PREVIEW_COOKIE}=${encodeURIComponent(value.toString())}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
 }
 
+/** `www.` and plain-HTTP requests for the canonical site: 301 to `https://<canonical><path><query>`. */
+function canonicalRedirect(url: URL, canonical: string): Response | null {
+  const isWww = url.hostname === `www.${canonical}`;
+  const isInsecureCanonical = url.hostname === canonical && url.protocol === 'http:';
+  if (!isWww && !isInsecureCanonical) return null;
+  const target = `https://${canonical}${url.pathname}${url.search}`;
+  return new Response(null, { status: 301, headers: { location: target, 'cache-control': 'public, max-age=3600' } });
+}
+
+async function route(request: Request, env: Env, url: URL): Promise<Response> {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return withSecurityHeaders(json(405, { error: 'method not allowed' }, { allow: 'GET, HEAD' }));
+  }
+  let path: string;
+  try {
+    path = decodeURIComponent(url.pathname);
+  } catch {
+    return withSecurityHeaders(json(400, { error: 'bad path' }));
+  }
+
+  if (path === '/mfe-manifest.json') return withSecurityHeaders(await serveManifest(request, env));
+  if (path.startsWith('/api/')) {
+    // Reserved for the career agent (future change).
+    return withSecurityHeaders(json(404, { error: 'not found' }, { 'cache-control': 'no-store' }));
+  }
+  const artifact = ARTIFACT_ROUTE.exec(path);
+  if (artifact?.[1]) return withSecurityHeaders(await serveArtifact(artifact[1], request, env));
+  if (/^\/(remotes|ui|content)\//.test(path)) return withSecurityHeaders(json(404, { error: 'not found' }));
+
+  const res = withSecurityHeaders(await env.ASSETS.fetch(request));
+  const cookie = await previewCookie(request, env);
+  if (cookie) res.headers.append('set-cookie', cookie);
+  return res;
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return withSecurityHeaders(json(405, { error: 'method not allowed' }, { allow: 'GET, HEAD' }));
-    }
     const url = new URL(request.url);
-    let path: string;
-    try {
-      path = decodeURIComponent(url.pathname);
-    } catch {
-      return withSecurityHeaders(json(400, { error: 'bad path' }));
-    }
-
-    if (path === '/mfe-manifest.json') return withSecurityHeaders(await serveManifest(request, env));
-    if (path.startsWith('/api/')) {
-      // Reserved for the career agent (future change).
-      return withSecurityHeaders(json(404, { error: 'not found' }, { 'cache-control': 'no-store' }));
-    }
-    const artifact = ARTIFACT_ROUTE.exec(path);
-    if (artifact?.[1]) return withSecurityHeaders(await serveArtifact(artifact[1], request, env));
-    if (/^\/(remotes|ui|content)\//.test(path)) return withSecurityHeaders(json(404, { error: 'not found' }));
-
-    const res = withSecurityHeaders(await env.ASSETS.fetch(request));
-    const cookie = await previewCookie(request, env);
-    if (cookie) res.headers.append('set-cookie', cookie);
+    const canonical = env.CANONICAL_HOST || DEFAULT_CANONICAL_HOST;
+    const redirect = canonicalRedirect(url, canonical);
+    // Every route returns a fresh Response from withSecurityHeaders, so its headers are mutable.
+    const res = redirect ? withSecurityHeaders(redirect) : await route(request, env, url);
+    // Staging, workers.dev and preview hosts must never be indexed (discoverability spec).
+    if (url.hostname !== canonical) res.headers.set('x-robots-tag', 'noindex');
     return res;
   },
 } satisfies ExportedHandler<Env>;
