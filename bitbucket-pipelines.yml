@@ -3,9 +3,9 @@
 #   pull requests  -> affected lint/typecheck/test/build only (no e2e)
 #   main           -> all checks, then Playwright (with axe) and Lighthouse CI
 #   custom: full   -> everything, on demand
-#   custom: deploy-staging / deploy-production -> manual deploys (never on merge); see docs/operations.md
-# Only the deploy steps declare a `deployment:`, so only they see Cloudflare credentials
-# (secured deployment variables). PR and main checks run against the local compose server.
+# Deploys never run here: the free minutes can't cover them, so they run from the operator's
+# workstation (tools/deploy/deploy.sh, docs/operations.md -> Deploying from the workstation).
+# Bitbucket holds no Cloudflare credentials. PR and main checks run against the local compose server.
 
 image: mcr.microsoft.com/playwright:v1.65.0-noble
 
@@ -73,38 +73,3 @@ pipelines:
             - pnpm nx run-many -t lint typecheck test build
             - pnpm nx run e2e:e2e
             - pnpm nx run e2e:lighthouse
-
-    # Manual deploys (Pipelines → Run pipeline, or a commit's "Run pipeline"). Nothing deploys on merge.
-    # Set DEPLOY_ALL=true for the first deploy or after a rollback (docs/operations.md → Deploying).
-    deploy-staging:
-      - variables:
-          - name: DEPLOY_ALL
-            default: 'false'
-            allowed-values: ['false', 'true']
-      - step:
-          <<: *e2e-reports
-          name: Deploy to staging, e2e against staging, mark verified
-          deployment: staging
-          caches: [pnpm]
-          script:
-            - export NX_DAEMON=false NX_NO_CLOUD=true
-            - ./tools/ci/setup.sh
-            - if [ "$DEPLOY_ALL" = "true" ]; then ALL=--all; else ALL=; fi
-            - pnpm release deploy --remote --env staging --base-url "$STAGING_URL" $ALL
-            - (cd apps/e2e && E2E_BASE_URL="$STAGING_URL" pnpm exec playwright test)
-            - pnpm release mark-verified --remote --env staging
-
-    deploy-production:
-      - variables:
-          - name: DEPLOY_ALL
-            default: 'false'
-            allowed-values: ['false', 'true']
-      - step:
-          name: Deploy to production (staging-verified commits only)
-          deployment: production
-          caches: [pnpm]
-          script:
-            - export NX_DAEMON=false NX_NO_CLOUD=true
-            - ./tools/ci/setup.sh
-            - if [ "$DEPLOY_ALL" = "true" ]; then ALL=--all; else ALL=; fi
-            - pnpm release deploy --remote --env production --base-url "$PRODUCTION_URL" $ALL

@@ -26,7 +26,7 @@ Version paths are never overwritten. Promoting or rolling back a version is a si
 
 ## One-time Cloudflare setup
 
-Run these from `apps/edge` with a logged-in Wrangler (`pnpm exec wrangler login`), or with `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` set.
+Run these from `apps/edge` with a logged-in Wrangler (`pnpm exec wrangler login`). There is no API token: Cloudflare access is the operator's Wrangler session, and Bitbucket holds no Cloudflare credentials.
 
 ```bash
 # R2 buckets (production and staging)
@@ -38,32 +38,23 @@ pnpm exec wrangler r2 bucket create befreeman-artifacts-staging
 pnpm exec wrangler kv namespace create MANIFESTS
 pnpm exec wrangler kv namespace create MANIFESTS --env staging
 
-# Preview-override secret (any long random string; the same value goes in CI)
-openssl rand -hex 32 | pnpm exec wrangler secret put PREVIEW_SECRET
-openssl rand -hex 32 | pnpm exec wrangler secret put PREVIEW_SECRET --env staging
+# Preview-override secret: a separate random value per environment.
+# Generate each one, save it in the password manager first (deploys need it), then paste it at the prompt.
+openssl rand -hex 32
+pnpm exec wrangler secret put PREVIEW_SECRET
+openssl rand -hex 32
+pnpm exec wrangler secret put PREVIEW_SECRET --env staging
 ```
 
 To serve the site on `befreeman.com`, move the domain's DNS to Cloudflare (the DNS steps are added to this runbook when the move happens), then uncomment the `routes` block in `apps/edge/wrangler.jsonc`. The next production deploy attaches `befreeman.com` and `www.befreeman.com` to the `befreeman-edge` Worker as custom domains. Staging sets `"routes": []` (routes are otherwise inherited) and is reachable only at its `*.workers.dev` URL.
 
-### API token for CI
+### Deploy URLs
 
-Create a token with **Workers Scripts: Edit**, **Workers KV Storage: Edit**, **Workers R2 Storage: Edit**, and **Account Settings: Read**.
-
-CI runs on Bitbucket Cloud Pipelines (see `bitbucket-pipelines.yml`). In the Bitbucket repository, open **Repository settings → Deployments** and add these as **secured** variables on the `staging` and `production` deployment environments. Secured variables are masked in logs and can't be read back after saving.
-
-| Variable                | Value                                                                                                                      |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `CLOUDFLARE_API_TOKEN`  | the token above                                                                                                            |
-| `CLOUDFLARE_ACCOUNT_ID` | the account id                                                                                                             |
-| `PREVIEW_SECRET`        | the same value given to `wrangler secret put PREVIEW_SECRET` for that environment                                          |
-| `STAGING_URL`           | `staging` only: `https://befreeman-edge-staging.<subdomain>.workers.dev` (not secret)                                      |
-| `PRODUCTION_URL`        | `production` only: the production `workers.dev` URL, then `https://befreeman.com` once the domain is attached (not secret) |
-
-Only steps that declare `deployment: staging` or `deployment: production` can see these variables, so pull-request and `main` builds never have Cloudflare credentials.
+Once the account exists, replace `REPLACE_WITH_WORKERS_SUBDOMAIN` in the two URLs at the top of `tools/deploy/deploy.sh` with the account's `workers.dev` subdomain (dashboard → **Workers & Pages**). After the custom domains are attached, change the production URL to `https://befreeman.com`. The URLs aren't secret.
 
 ## Deploying
 
-A deploy is one command per environment. In normal use the Bitbucket pipelines run it (see [Deploy pipelines](#deploy-pipelines)); it also runs locally for rehearsal or an emergency.
+A deploy is one command per environment, run from the workstation by `tools/deploy/deploy.sh` (see [Deploying from the workstation](#deploying-from-the-workstation)). That script wraps `release deploy`, which can also run directly with `--local` for rehearsal.
 
 ```bash
 PREVIEW_SECRET=… pnpm release deploy --env <staging|production> --base-url https://<site> [--all] [--remote]
@@ -82,29 +73,48 @@ pnpm release mark-verified --env staging [--remote]     # staging only: HEAD pas
 
 With `--remote`, it refuses a dirty working tree.
 
-**After a rollback, the next deploy needs `--all`** (`DEPLOY_ALL=true` in the pipeline), or a commit that touches the rolled-back part. Otherwise the planner sees nothing changed since `deploy:commit` and leaves the rolled-back version live.
+**After a rollback, the next deploy needs `--all`** (`tools/deploy/deploy.sh <env> --all`), or a commit that touches the rolled-back part. Otherwise the planner sees nothing changed since `deploy:commit` and leaves the rolled-back version live.
 
 `pnpm release status` prints the live manifest and `deploy:commit`.
 
-## Deploy pipelines
+## Deploying from the workstation
 
-Both are manual custom pipelines in `bitbucket-pipelines.yml`. Merging to `main` only runs checks; it never deploys.
+Deploys never run in CI: Bitbucket's free build minutes can't cover them, so Bitbucket runs only the checks. Merging to `main` never deploys.
 
-| Pipeline            | Deployment environment | What it runs                                                                                                        | Build minutes (estimate)    |
-| ------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `deploy-staging`    | `staging`              | `release deploy --env staging`, then the full Playwright suite against `$STAGING_URL`, then `release mark-verified` | ~6 (more with `DEPLOY_ALL`) |
-| `deploy-production` | `production`           | `release deploy --env production` (refuses unless staging verified this exact commit)                               | ~4 (more with `DEPLOY_ALL`) |
+### Prerequisites
 
-The estimates are refined from real runs in the verification log. The free plan has 50 minutes a month, shared with the `main` checks (~3 minutes per merge).
+- Node matching `.nvmrc` (same major, same or newer) and the pnpm version in `package.json`'s `packageManager`. The script checks both.
+- `pnpm install`, then the Playwright browsers: `(cd apps/e2e && pnpm exec playwright install chromium)`.
+- A Wrangler session: `(cd apps/edge && pnpm exec wrangler login)`. Check it with `pnpm exec wrangler whoami`. It's OAuth and can be revoked from the Cloudflare dashboard.
+- That environment's `PREVIEW_SECRET` from the password manager, exported only in the deploy shell. Don't put it in a file in the repo or in shell history (for example `read -rs PREVIEW_SECRET && export PREVIEW_SECRET`).
+- The deploy URLs set at the top of `tools/deploy/deploy.sh` (see [Deploy URLs](#deploy-urls)).
 
-**To run one:**
+### Commands
 
-- **Latest commit on a branch:** Pipelines → **Run pipeline** → choose the branch (normally `main`) → choose `custom: deploy-staging` or `custom: deploy-production` → set `DEPLOY_ALL` → **Run**.
-- **A specific commit:** Commits → open the commit → **Run pipeline** (in the commit's pipeline panel) → choose the custom pipeline. Production requires that the same commit passed `deploy-staging` first.
+```bash
+tools/deploy/deploy.sh staging [--all]       # deploy, Playwright suite against staging, mark-verified
+tools/deploy/deploy.sh production [--all]    # refuses unless staging verified this exact commit
+```
 
-The normal flow is: merge to `main` → run `deploy-staging` on `main` → check staging → run `deploy-production` for that same commit.
+The script deploys the checked-out commit. Before it builds anything, it stops unless:
 
-Set `DEPLOY_ALL=true` for the first deploy to an environment and for the first deploy after a `release rollback` (see [Deploying](#deploying)).
+- the working tree is clean;
+- HEAD is on `origin/main` (it fetches first), so only reviewed, pushed commits are deployed;
+- `PREVIEW_SECRET` is set and the deploy URL has been filled in;
+- the Node and pnpm versions match;
+- Wrangler is logged in.
+
+Then it runs `release deploy --remote` (see [Deploying](#deploying)). For staging it also runs the full Playwright suite against the staging URL and then `release mark-verified`.
+
+The normal flow is: merge to `main` → `git checkout main && git pull` → `tools/deploy/deploy.sh staging` → check staging → `tools/deploy/deploy.sh production` on that same commit.
+
+**A specific commit:** check it out (`git checkout <sha>`) and run the script. It must already be on `origin/main`, and production requires that the same commit passed a staging deploy.
+
+Use `--all` for the first deploy to an environment and for the first deploy after a `release rollback`.
+
+### Audit tags
+
+After each successful deploy the script pushes a lightweight tag `deployed/<env>/<UTC timestamp>` (for example `deployed/staging/20261119-031500`) on the deployed commit. Tag pushes trigger no pipelines. List the history with `git tag -l 'deployed/*' --sort=-refname`. If the tag push fails, the deploy still stands; push the tag later with the command the script prints.
 
 ## Commands
 
@@ -144,7 +154,7 @@ pnpm release publish content [--skip-existing]
 
 - Uploads the build output to `remotes/<name>/<version>/` (or `ui/<version>/`).
 - The default version is `<package version>-<git short sha>`. A dirty working tree adds a `-dirty…` suffix.
-- **Publishing an existing version fails without changing anything.** CI passes `--skip-existing` so re-runs are idempotent.
+- **Publishing an existing version fails without changing anything.** `release deploy` passes `--skip-existing` so re-runs are idempotent.
 - Content files are content-addressed, so republishing identical content is refused the same way.
 
 ### Promote
