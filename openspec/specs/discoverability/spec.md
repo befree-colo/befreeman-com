@@ -44,3 +44,14 @@ The site SHALL publish a sitemap listing every pre-rendered page and a robots po
 #### Scenario: New achievement added
 - **WHEN** a new achievement is added to the content and the site is rebuilt
 - **THEN** its detail URL appears in the sitemap
+
+### Requirement: Non-production environments are not indexed
+Every response from a non-production environment SHALL tell search engines not to index it, and production responses SHALL NOT carry that instruction. Canonical URLs on every environment SHALL point at the production domain.
+
+#### Scenario: Crawler visits staging
+- **WHEN** a crawler requests any page on the staging site
+- **THEN** the response includes `X-Robots-Tag: noindex` and the page's canonical URL points at `https://befreeman.com/`
+
+#### Scenario: Crawler visits production
+- **WHEN** a crawler requests any page on `https://befreeman.com`
+- **THEN** the response does not include a `noindex` instruction

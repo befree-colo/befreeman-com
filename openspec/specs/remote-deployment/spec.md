@@ -10,7 +10,7 @@ Defines how the shell, each remote, and the content bundle are released independ
 Each remote, the shell, the shared UI component library, and the content bundle SHALL be buildable, testable, and releasable on its own, and a change confined to one of them SHALL NOT require rebuilding or redeploying the others.
 
 #### Scenario: Change only the timeline remote
-- **WHEN** a commit modifies only the timeline remote's source
+- **WHEN** a commit modifies only the timeline remote's source and a deploy run starts
 - **THEN** CI builds, tests, and releases only the timeline remote
 
 #### Scenario: Change a shared library
@@ -51,3 +51,46 @@ The shell, remotes, shared UI component library, content bundle, and manifest SH
 #### Scenario: Content security policy enforced
 - **WHEN** the site is loaded in a browser
 - **THEN** the response's content security policy allows scripts only from the site's own origin, and all remotes load and mount successfully under it
+
+### Requirement: Deployment environments
+The site SHALL have two independent environments, staging and production, each with its own artifact storage, deployment manifest, and preview secret. A release, promotion, or rollback in one environment SHALL NOT change the other.
+
+#### Scenario: Promote on staging
+- **WHEN** a new timeline version is promoted on staging
+- **THEN** staging serves the new version and production's live manifest is unchanged
+
+### Requirement: Manually triggered deploys
+Deploys SHALL run only when a person starts a deploy run for a chosen environment and commit. Merging to `main` SHALL NOT deploy anything.
+
+#### Scenario: Merge to main
+- **WHEN** a pull request is merged to `main`
+- **THEN** the checks run and neither environment's live manifest or Worker changes
+
+#### Scenario: Start a staging deploy
+- **WHEN** someone starts the staging deploy run for a commit
+- **THEN** the run releases that commit's changed parts to staging and promotes them
+
+### Requirement: Deploy only what changed since the last deploy
+A deploy run SHALL release only the parts whose source changed since the commit last deployed to that environment, and SHALL record the newly deployed commit for that environment only after every promotion in the run succeeds. When the environment has no recorded commit, the run SHALL release every part.
+
+#### Scenario: Timeline-only change since the last deploy
+- **WHEN** the only change since staging's last deployed commit is in the timeline remote
+- **THEN** the staging deploy run publishes and promotes only the timeline remote and leaves the other live versions unchanged
+
+#### Scenario: A promotion fails
+- **WHEN** a promotion's smoke check fails during a deploy run
+- **THEN** the run fails, the recorded last-deployed commit is unchanged, and the next run retries the same parts
+
+### Requirement: Production receives what staging verified
+A production deploy SHALL release a commit that has already been deployed to staging and verified there, built from the same source.
+
+#### Scenario: Deploy an unverified commit to production
+- **WHEN** someone starts the production deploy for a commit that was never deployed to staging
+- **THEN** the run stops before releasing anything and explains that the commit must be deployed to staging first
+
+### Requirement: Deployment credentials are scoped
+Cloud credentials and preview secrets SHALL be available only to deploy runs for their own environment, never to pull-request or branch check runs, and SHALL NOT be stored in the repository or printed in logs.
+
+#### Scenario: Pull-request build
+- **WHEN** a pull-request pipeline runs
+- **THEN** it has no access to Cloudflare credentials or preview secrets
