@@ -13,30 +13,33 @@
 - [x] 2.3 Add `release mark-verified --env staging` (writes `deploy:verified:<sha>`). Make `release deploy --env production` refuse to start unless staging holds that key for HEAD. Verify with unit tests: a verified commit proceeds, and an unverified commit stops before any build or publish with the explanatory message from the spec.
 - [x] 2.4 Rehearse `release deploy` locally against `wrangler dev` (`--local`): a first deploy, a timeline-only change, and a forced failure. Verify the live manifest and `deploy:commit` with `release status`. Document the command in `docs/operations.md`, including `DEPLOY_ALL` after a rollback.
 
-## 3. Bitbucket deploy pipelines (D1)
+## 3. Deploy path (D1)
 
-- [x] 3.1 Add `custom: deploy-staging`. It's one `deployment: staging` step: setup, `release deploy --env staging --base-url $STAGING_URL`, the Playwright suite with `E2E_BASE_URL=$STAGING_URL`, then `release mark-verified`. It takes an optional `DEPLOY_ALL` variable. Verify the YAML with Bitbucket's validator and confirm `pull-requests` and `main` remain checks-only.
-- [x] 3.2 Add `custom: deploy-production`. It's one `deployment: production` step running `release deploy --env production --base-url $PRODUCTION_URL`, with optional `DEPLOY_ALL`. Verify the YAML, and document in `docs/operations.md` how to run either pipeline for a specific commit and what each costs in build minutes.
+- [x] 3.1 *(Superseded by 3.3–3.5: deploys moved to the workstation.)* Add `custom: deploy-staging`. It's one `deployment: staging` step: setup, `release deploy --env staging --base-url $STAGING_URL`, the Playwright suite with `E2E_BASE_URL=$STAGING_URL`, then `release mark-verified`. It takes an optional `DEPLOY_ALL` variable. Verify the YAML with Bitbucket's validator and confirm `pull-requests` and `main` remain checks-only.
+- [x] 3.2 *(Superseded by 3.3–3.5.)* Add `custom: deploy-production`. It's one `deployment: production` step running `release deploy --env production --base-url $PRODUCTION_URL`, with optional `DEPLOY_ALL`. Verify the YAML, and document in `docs/operations.md` how to run either pipeline for a specific commit and what each costs in build minutes.
+- [ ] 3.3 Remove `custom: deploy-staging` and `custom: deploy-production` from `bitbucket-pipelines.yml`, and update its header comment. Verify the YAML with Bitbucket's validator and that `pull-requests`, `main`, and `custom: full` are unchanged.
+- [ ] 3.4 Add `tools/deploy/deploy.sh <staging|production> [--all]` (D1): the guards (clean tree, HEAD on `origin/main`, `PREVIEW_SECRET` set, `wrangler whoami`, pinned Node and pnpm), `release deploy --remote`, for staging the Playwright suite and `release mark-verified`, then the `deployed/<env>/<timestamp>` tag push. Verify each guard by running the script in the failing state (dirty tree, unpushed commit, unset secret) and confirming it stops before any build, and with `shellcheck`.
+- [ ] 3.5 Replace the runbook's "Deploy pipelines" section in `docs/operations.md` with "Deploying from the workstation": prerequisites (`wrangler login`, Node and pnpm versions, Playwright browsers, preview secrets from the password manager), the commands, deploying a specific commit, `--all` after a rollback, and the audit tags. Verify that no remaining text in the runbook or `bitbucket-pipelines.yml` describes CI deploys.
 
 ## 4. Cloudflare resources and secrets (D6) — Brian runs the account steps, Claude prepares the commands
 
 - [ ] 4.1 Create the R2 buckets and KV namespaces for both environments, and put the real KV IDs in `wrangler.jsonc`. Verify with `wrangler r2 bucket list`, `wrangler kv namespace list`, and `wrangler deploy --dry-run --env staging`.
 - [ ] 4.2 Set a separate random `PREVIEW_SECRET` per environment with `wrangler secret put`. Verify with `wrangler secret list [--env staging]`.
-- [ ] 4.3 Create the scoped API token (D6). In Bitbucket → Repository settings → Deployments, add `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `PREVIEW_SECRET` as secured variables on `staging` and `production`, plus `STAGING_URL` and `PRODUCTION_URL`. Verify that a PR pipeline run's environment shows none of them, and that the runbook lists them.
+- [ ] 4.3 Run `wrangler login` on the workstation and save each environment's `PREVIEW_SECRET` in the password manager (D6). Verify with `wrangler whoami`, and confirm that Bitbucket's repository and deployment variables contain no Cloudflare credentials or preview secrets.
 
 ## 5. Staging: first deploy and verification
 
-- [ ] 5.1 Run `deploy-staging` with `DEPLOY_ALL=true`. Verify the run passes, including the e2e suite against staging with CSP under the real Worker headers; that `release status --remote --env staging` shows every part; and that staging responses carry `X-Robots-Tag: noindex`.
+- [ ] 5.1 Run `tools/deploy/deploy.sh staging --all`. Verify the run passes, including the e2e suite against staging with CSP under the real Worker headers; that `release status --remote --env staging` shows every part; and that staging responses carry `X-Robots-Tag: noindex`; and that a `deployed/staging/...` tag was pushed.
 - [ ] 5.2 Run every release command against staging (`publish`, `promote` with a smoke check, `preview-link`, `status`, duplicate publish refused, `rollback`). Verify by adding a row to the runbook's verification log.
 - [ ] 5.3 Rollback drill: publish a deliberately broken remote, promote it with `--skip-smoke`, confirm the static fallback and the "unavailable" notice, then `release rollback`. Verify that new page loads use the prior version, and record the drill in `docs/operations.md`.
-- [ ] 5.4 Make a timeline-only commit and run `deploy-staging` without `DEPLOY_ALL`. Verify from the run log and `release status` that only the timeline was published and promoted.
+- [ ] 5.4 Make a timeline-only commit and run `tools/deploy/deploy.sh staging` without `--all`. Verify from the run's output and `release status` that only the timeline was published and promoted.
 
 ## 6. DNS move and production (D5)
 
 - [ ] 6.1 Export the current DNS host's befreeman.com zone, and list MX, SPF, DKIM, DMARC, and the other records with `dig`. Save the export in the scratchpad (not the repo). Verify that the list is complete against the current host's dashboard.
 - [ ] 6.2 Brian adds befreeman.com as a free Cloudflare zone. Compare the imported records with 6.1, add anything missing, and set mail records to DNS-only. Verify with `dig @<cloudflare-ns> befreeman.com MX/TXT`, and DKIM and DMARC lookups, matching 6.1 exactly.
 - [ ] 6.3 Brian switches nameservers at the registrar. Verify that the zone shows Active, public `dig` answers match 6.1, and a test email to and from the domain is delivered.
-- [ ] 6.4 Enable "Always Use HTTPS". Uncomment the production custom-domain routes and merge. Run `deploy-production` with `DEPLOY_ALL=true` for the staging-verified commit. Verify that `https://befreeman.com/` serves the site with no `noindex` header, that `http://` and `www.` return 301 to the canonical URL, and that the certificate is valid.
+- [ ] 6.4 Enable "Always Use HTTPS". Uncomment the production custom-domain routes and merge. On the staging-verified commit, run `tools/deploy/deploy.sh production --all`. Verify that `https://befreeman.com/` serves the site with no `noindex` header, that `http://` and `www.` return 301 to the canonical URL, and that the certificate is valid.
 
 ## 7. Integration check
 

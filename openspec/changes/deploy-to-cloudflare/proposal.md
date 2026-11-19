@@ -2,18 +2,20 @@
 
 ## Why
 
-The platform is built and verified locally, but befreeman.com is not live. The Worker, the release tool, and the runbook exist; what's missing is the Cloudflare resources, a way to deploy from CI without spending build minutes on every merge, a verified staging environment, and the domain pointing at the Worker.
+The platform is built and verified locally, but befreeman.com is not live. The Worker, the release tool, and the runbook exist; what's missing is the Cloudflare resources, a repeatable way to deploy that doesn't spend Bitbucket build minutes (the free plan's 50 minutes a month don't cover deploy runs), a verified staging environment, and the domain pointing at the Worker.
 
 ## What Changes
 
 - Create the Cloudflare resources for **staging** and **production**:
   - R2 buckets;
   - KV namespaces, with their IDs in `apps/edge/wrangler.jsonc`;
-  - the `PREVIEW_SECRET` Worker secret;
-  - a scoped API token for CI.
-- Add two **manually triggered** Bitbucket custom pipelines, `deploy-staging` and `deploy-production`. Nothing deploys on merge, which keeps the free plan's 50 build minutes for checks.
+  - the `PREVIEW_SECRET` Worker secret.
+- Deploy **manually from Brian's workstation** with one script per run, `tools/deploy/deploy.sh <staging|production> [--all]`. Nothing deploys on merge, and Bitbucket runs only the checks.
+  - The script deploys only a clean, pushed commit that is already on `origin/main`.
   - Each deploy publishes and promotes only the parts that changed since that environment's last deploy, then deploys the Worker.
-  - Credentials are secured variables visible only to the deployment steps.
+  - Each successful deploy pushes a `deployed/<env>/<UTC timestamp>` git tag as the audit trail.
+  - Credentials stay on the workstation: a `wrangler login` session and the preview secrets in Brian's password manager. Bitbucket holds no Cloudflare credentials.
+- Remove the `deploy-staging` and `deploy-production` Bitbucket custom pipelines added earlier in this change.
 - Record the last deployed commit per environment, so a deploy run knows what changed.
 - Mark staging as not for search engines (`X-Robots-Tag: noindex`), so it never competes with befreeman.com in search results.
 - Verify on staging:
@@ -26,7 +28,7 @@ The platform is built and verified locally, but befreeman.com is not live. The W
 ### Out of scope
 
 - The contact form that emails Brian without exposing his address. It's a separate change (an `/api/contact` Worker endpoint with spam protection).
-- Deploy on merge. It can be added later if build minutes allow.
+- Deploying from CI, on merge or on demand. CI deploy pipelines can come back if build minutes allow.
 - Paid Cloudflare features. Everything here fits the free plans.
 
 ## Capabilities
@@ -36,8 +38,8 @@ The platform is built and verified locally, but befreeman.com is not live. The W
 
 ### Modified Capabilities
 - `remote-deployment`:
-  - Releases happen through manually triggered deploy runs, not on every merge.
-  - Adds staging and production environments with scoped credentials.
+  - Releases happen through manual deploy runs from the operator's workstation, never from CI or on merge.
+  - Adds staging and production environments; credentials never reach CI or the repository.
   - Production receives only what was verified on staging.
 - `discoverability`: non-production environments are excluded from search indexing.
 
@@ -52,7 +54,8 @@ The platform is built and verified locally, but befreeman.com is not live. The W
 - **Code**:
   - `apps/edge`: wrangler.jsonc IDs and an environment variable for staging's noindex header;
   - `tools/release`: a record of the last deployed commit;
-  - `bitbucket-pipelines.yml`: two custom pipelines;
+  - `tools/deploy/deploy.sh`: the workstation deploy script;
+  - `bitbucket-pipelines.yml`: remove the two deploy pipelines;
   - `docs/operations.md`.
-- **CI minutes**: deploys spend minutes only when someone runs them. Estimated 4–6 minutes per run.
-- **Secrets**: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `PREVIEW_SECRET` as secured Bitbucket deployment variables. None go in the repository.
+- **CI minutes**: deploys spend none.
+- **Secrets**: a `wrangler login` (OAuth) session on Brian's workstation, and one `PREVIEW_SECRET` per environment kept in his password manager. None go in the repository or in Bitbucket.

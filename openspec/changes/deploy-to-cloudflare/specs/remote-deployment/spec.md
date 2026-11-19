@@ -11,7 +11,7 @@ Each remote, the shell, the shared UI component library, and the content bundle 
 
 #### Scenario: Change only the timeline remote
 - **WHEN** a commit modifies only the timeline remote's source and a deploy run starts
-- **THEN** CI builds, tests, and releases only the timeline remote
+- **THEN** the deploy run builds and releases only the timeline remote
 
 #### Scenario: Change a shared library
 - **WHEN** a commit modifies a shared library used by several projects
@@ -27,7 +27,7 @@ The site SHALL have two independent environments, staging and production, each w
 - **THEN** staging serves the new version and production's live manifest is unchanged
 
 ### Requirement: Manually triggered deploys
-Deploys SHALL run only when a person starts a deploy run for a chosen environment and commit. Merging to `main` SHALL NOT deploy anything.
+Deploys SHALL run only when a person starts a deploy run for a chosen environment and commit. Merging to `main` SHALL NOT deploy anything. A deploy run SHALL release only a commit with no uncommitted changes that is already on the shared `main` branch, and each successful run SHALL leave a record of the environment, commit, and time in the repository.
 
 #### Scenario: Merge to main
 - **WHEN** a pull request is merged to `main`
@@ -35,7 +35,11 @@ Deploys SHALL run only when a person starts a deploy run for a chosen environmen
 
 #### Scenario: Start a staging deploy
 - **WHEN** someone starts the staging deploy run for a commit
-- **THEN** the run releases that commit's changed parts to staging and promotes them
+- **THEN** the run releases that commit's changed parts to staging and promotes them, and the repository records the deploy
+
+#### Scenario: Deploy uncommitted or unpushed work
+- **WHEN** someone starts a deploy with uncommitted changes, or for a commit that is not on the shared `main` branch
+- **THEN** the run stops before building anything and explains why
 
 ### Requirement: Deploy only what changed since the last deploy
 A deploy run SHALL release only the parts whose source changed since the commit last deployed to that environment, and SHALL record the newly deployed commit for that environment only after every promotion in the run succeeds. When the environment has no recorded commit, the run SHALL release every part.
@@ -56,8 +60,8 @@ A production deploy SHALL release a commit that has already been deployed to sta
 - **THEN** the run stops before releasing anything and explains that the commit must be deployed to staging first
 
 ### Requirement: Deployment credentials are scoped
-Cloud credentials and preview secrets SHALL be available only to deploy runs for their own environment, never to pull-request or branch check runs, and SHALL NOT be stored in the repository or printed in logs.
+Cloud credentials and preview secrets SHALL exist only on the deploying operator's workstation, SHALL NOT be available to any CI pipeline, and SHALL NOT be stored in the repository or printed in logs. Each environment SHALL have its own preview secret.
 
-#### Scenario: Pull-request build
-- **WHEN** a pull-request pipeline runs
+#### Scenario: Pull-request or main build
+- **WHEN** a pull-request or `main` pipeline runs
 - **THEN** it has no access to Cloudflare credentials or preview secrets
