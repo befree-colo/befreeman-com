@@ -43,7 +43,7 @@
 
 ## 7. Integration check
 
-- [ ] 7.1 Run the Playwright suite against `https://befreeman.com` (`E2E_BASE_URL`). Verify that all tests pass, and record production in the runbook's verification log.
+- [x] 7.1 7.1 Run the Playwright suite against `https://befreeman.com` (`E2E_BASE_URL`). Verify that all tests pass, and record production in the runbook's verification log. Done 2026-11-23: 74 passed after turning off Cloudflare Web Analytics automatic setup, whose injected beacon the CSP blocked.
 
 ## Workflow follow-up
 
