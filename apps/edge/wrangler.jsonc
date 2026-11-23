@@ -1,74 +1,42 @@
 {
-	"$schema": "../../node_modules/wrangler/config-schema.json",
-	"name": "befreeman-edge",
-	"main": "src/index.ts",
-	"compatibility_date": "2026-11-01",
-	"compatibility_flags": [
-		"nodejs_compat"
-	],
-	"observability": {
-		"enabled": true
-	},
-	// Shell + pre-rendered pages. The Worker runs first so every response gets security headers.
-	"assets": {
-		"directory": "../../dist/apps/shell",
-		"binding": "ASSETS",
-		"run_worker_first": true,
-		"not_found_handling": "404-page",
-		"html_handling": "drop-trailing-slash"
-	},
-	// Immutable, versioned artifacts: remotes/<name>/<version>/*, ui/<version>/*, content/*
-	"r2_buckets": [
-		{
-			"binding": "ARTIFACTS",
-			"bucket_name": "befreeman-artifacts"
-		},
-		{
-			"bucket_name": "befreeman-artifacts-staging",
-			"binding": "befreeman_artifacts_staging"
-		}
-	],
-	// manifest:live and manifest:history:<timestamp>
-	"kv_namespaces": [
-		{
-			"binding": "MANIFESTS",
-			"id": "eb4fa83a4d75469a8609b0ea8931b72b"
-		}
-	],
-	// Production custom domains (top level only; staging keeps just its workers.dev URL).
-	// Enabled in task 6.4, once the befreeman.com zone is Active on Cloudflare.
-	"routes": [
-	  { "pattern": "befreeman.com", "custom_domain": true },
-	  { "pattern": "www.befreeman.com", "custom_domain": true }
-	],
-	// Responses on any other host carry X-Robots-Tag: noindex; www. and http:// redirect to it.
-	"vars": {
-		"CANONICAL_HOST": "befreeman.com"
-	},
-	// Secrets (wrangler secret put): PREVIEW_SECRET
-	"env": {
-		"staging": {
-			"name": "befreeman-edge-staging",
-			// vars are not inherited by named environments. Staging keeps the production canonical host,
-			// so its workers.dev URL is always noindex.
-			"vars": {
-				"CANONICAL_HOST": "befreeman.com"
-			},
-			// routes ARE inherited from the top level: without this, a staging deploy would take the
-			// befreeman.com custom domains away from production.
-			"routes": [],
-			"r2_buckets": [
-				{
-					"binding": "ARTIFACTS",
-					"bucket_name": "befreeman-artifacts-staging"
-				}
-			],
-			"kv_namespaces": [
-				{
-					"binding": "MANIFESTS",
-					"id": "6db652b3e8e1464b95b7c994379d6549"
-				}
-			]
-		}
-	}
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "befreeman-edge",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Shell + pre-rendered pages. The Worker runs first so every response gets security headers.
+  "assets": {
+    "directory": "../../dist/apps/shell",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash"
+  },
+  // Immutable, versioned artifacts: remotes/<name>/<version>/*, ui/<version>/*, content/*
+  "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "befreeman-artifacts" }],
+  // manifest:live and manifest:history:<timestamp>
+  "kv_namespaces": [{ "binding": "MANIFESTS", "id": "eb4fa83a4d75469a8609b0ea8931b72b" }],
+  // Production custom domains (top level only; staging keeps just its workers.dev URL).
+  // Attached in task 6.4; the deploy manages their DNS records in the befreeman.com zone.
+  "routes": [
+    { "pattern": "befreeman.com", "custom_domain": true },
+    { "pattern": "www.befreeman.com", "custom_domain": true }
+  ],
+  // Responses on any other host carry X-Robots-Tag: noindex; www. and http:// redirect to it.
+  "vars": { "CANONICAL_HOST": "befreeman.com" },
+  // Secrets (wrangler secret put): PREVIEW_SECRET
+  "env": {
+    "staging": {
+      "name": "befreeman-edge-staging",
+      // vars are not inherited by named environments. Staging keeps the production canonical host,
+      // so its workers.dev URL is always noindex.
+      "vars": { "CANONICAL_HOST": "befreeman.com" },
+      // routes ARE inherited from the top level: without this, a staging deploy would take the
+      // befreeman.com custom domains away from production.
+      "routes": [],
+      "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "befreeman-artifacts-staging" }],
+      "kv_namespaces": [{ "binding": "MANIFESTS", "id": "6db652b3e8e1464b95b7c994379d6549" }]
+    }
+  }
 }

@@ -11,8 +11,8 @@ set -euo pipefail
 
 # Not secrets. Replace the subdomain once the Cloudflare account exists (dashboard → Workers & Pages).
 STAGING_URL="https://befreeman-edge-staging.brian-acb.workers.dev"
-# Switch to https://befreeman.com once the custom domains are attached (tasks.md 6.4).
-PRODUCTION_URL="https://befreeman-edge.brian-acb.workers.dev"
+# Custom domains attached (tasks.md 6.4); the workers.dev URL is no longer served for production.
+PRODUCTION_URL="https://befreeman.com"
 
 die() {
   echo "deploy: $*" >&2

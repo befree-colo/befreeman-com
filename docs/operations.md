@@ -46,11 +46,27 @@ openssl rand -hex 32
 pnpm exec wrangler secret put PREVIEW_SECRET --env staging
 ```
 
-To serve the site on `befreeman.com`, move the domain's DNS to Cloudflare (the DNS steps are added to this runbook when the move happens), then uncomment the `routes` block in `apps/edge/wrangler.jsonc`. The next production deploy attaches `befreeman.com` and `www.befreeman.com` to the `befreeman-edge` Worker as custom domains. Staging sets `"routes": []` (routes are otherwise inherited) and is reachable only at its `*.workers.dev` URL.
+R2 has to be enabled once in the dashboard (**R2 → Purchase R2**, which needs a payment method even on the free tier) before `r2 bucket create` works; otherwise it fails with code 10042.
+
+When `r2 bucket create` or `kv namespace create` offers to add the binding to `wrangler.jsonc`, answer **no**: the bindings are already there, and accepting adds a duplicate at the top level, which gives the production Worker the staging bucket. When it asks whether local dev should connect to the remote resource, also answer **no**: `wrangler dev` and `release --local` use local storage.
+
+### Custom domains (`befreeman.com`)
+
+The Worker serves `befreeman.com` and `www.befreeman.com` as Workers custom domains (the `routes` block in `apps/edge/wrangler.jsonc`). Unlike Pages, a Worker custom domain requires the domain to be a zone in the same Cloudflare account, on Cloudflare's nameservers. The move, done 2026-11-23:
+
+1. Dashboard → **Add a domain** → `befreeman.com`, Free plan. Check the imported DNS records, keeping MX and TXT (mail, SPF/DKIM, verification).
+2. Change the nameservers at the registrar to the two Cloudflare assigns, and wait for the zone to show **Active**. Until then, a deploy with `routes` fails with `Can't infer zone from route` (code 10082).
+3. In **DNS → Records**, delete the imported A, AAAA, and CNAME records for `@` and `www` (the old site's `www` CNAME to `befreeman.pages.dev` caused Error 1016/530). Remove the hostnames from any Pages project that still claims them.
+4. Deploy production (`tools/deploy/deploy.sh production --all`). The deploy attaches both hostnames and creates their DNS records (shown as Worker records) and certificates. Don't create or edit those records by hand.
+5. Check: `curl -I https://befreeman.com/` returns 200 and `curl -I https://www.befreeman.com/` returns 301 to `https://befreeman.com/`. The domains are listed under **Workers & Pages → befreeman-edge → Settings → Domains & Routes**.
+
+With `routes` set, Wrangler doesn't serve production on `workers.dev`. Staging sets `"routes": []` (routes are otherwise inherited) and is reachable only at its `*.workers.dev` URL.
+
+Browsers that visited the old site may have cached its 301 from `befreeman.com` to `www`. That's harmless now, since `www` redirects back to the apex, but test changes in a private window or with `curl`.
 
 ### Deploy URLs
 
-Once the account exists, replace `REPLACE_WITH_WORKERS_SUBDOMAIN` in the two URLs at the top of `tools/deploy/deploy.sh` with the account's `workers.dev` subdomain (dashboard → **Workers & Pages**). After the custom domains are attached, change the production URL to `https://befreeman.com`. The URLs aren't secret.
+The two URLs at the top of `tools/deploy/deploy.sh` are the smoke-check targets: staging is `https://befreeman-edge-staging.brian-acb.workers.dev` and production is `https://befreeman.com`. The URLs aren't secret.
 
 ## Deploying
 
