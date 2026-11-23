@@ -11,7 +11,7 @@
     "binding": "ASSETS",
     "run_worker_first": true,
     "not_found_handling": "404-page",
-    "html_handling": "drop-trailing-slash"
+    "html_handling": "drop-trailing-slash",
   },
   // Immutable, versioned artifacts: remotes/<name>/<version>/*, ui/<version>/*, content/*
   "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "befreeman-artifacts" }],
@@ -21,7 +21,7 @@
   // Attached in task 6.4; the deploy manages their DNS records in the befreeman.com zone.
   "routes": [
     { "pattern": "befreeman.com", "custom_domain": true },
-    { "pattern": "www.befreeman.com", "custom_domain": true }
+    { "pattern": "www.befreeman.com", "custom_domain": true },
   ],
   // Responses on any other host carry X-Robots-Tag: noindex; www. and http:// redirect to it.
   "vars": { "CANONICAL_HOST": "befreeman.com" },
@@ -36,7 +36,7 @@
       // befreeman.com custom domains away from production.
       "routes": [],
       "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "befreeman-artifacts-staging" }],
-      "kv_namespaces": [{ "binding": "MANIFESTS", "id": "6db652b3e8e1464b95b7c994379d6549" }]
-    }
-  }
+      "kv_namespaces": [{ "binding": "MANIFESTS", "id": "6db652b3e8e1464b95b7c994379d6549" }],
+    },
+  },
 }

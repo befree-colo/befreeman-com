@@ -7,5 +7,5 @@
   "compatibility_flags": ["nodejs_compat"],
   "r2_buckets": [{ "binding": "ARTIFACTS", "bucket_name": "test-artifacts" }],
   "kv_namespaces": [{ "binding": "MANIFESTS", "id": "test-manifests" }],
-  "vars": { "PREVIEW_SECRET": "test-secret", "CANONICAL_HOST": "befreeman.com" }
+  "vars": { "PREVIEW_SECRET": "test-secret", "CANONICAL_HOST": "befreeman.com" },
 }
