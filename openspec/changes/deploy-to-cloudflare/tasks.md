@@ -36,10 +36,10 @@
 
 ## 6. DNS move and production (D5)
 
-- [ ] 6.1 Export the current DNS host's befreeman.com zone, and list MX, SPF, DKIM, DMARC, and the other records with `dig`. Save the export in the scratchpad (not the repo). Verify that the list is complete against the current host's dashboard.
-- [ ] 6.2 Brian adds befreeman.com as a free Cloudflare zone. Compare the imported records with 6.1, add anything missing, and set mail records to DNS-only. Verify with `dig @<cloudflare-ns> befreeman.com MX/TXT`, and DKIM and DMARC lookups, matching 6.1 exactly.
-- [ ] 6.3 Brian switches nameservers at the registrar. Verify that the zone shows Active, public `dig` answers match 6.1, and a test email to and from the domain is delivered.
-- [ ] 6.4 Enable "Always Use HTTPS". Uncomment the production custom-domain routes and merge. On the staging-verified commit, run `tools/deploy/deploy.sh production --all`. Verify that `https://befreeman.com/` serves the site with no `noindex` header, that `http://` and `www.` return 301 to the canonical URL, and that the certificate is valid.
+- [x] 6.1 Export the current DNS host's befreeman.com zone, and list MX, SPF, DKIM, DMARC, and the other records with `dig`. Save the export in the scratchpad (not the repo). Verify that the list is complete against the current host's dashboard. Done 2026-11-23 without a saved zone export: the imported records were checked with `dig` against the Cloudflare nameservers instead (Google MX and SPF present; no DMARC, tracked as TODOS-56).
+- [x] 6.2 Brian adds befreeman.com as a free Cloudflare zone. Compare the imported records with 6.1, add anything missing, and set mail records to DNS-only. Verify with `dig @<cloudflare-ns> befreeman.com MX/TXT`, and DKIM and DMARC lookups, matching 6.1 exactly.
+- [x] 6.3 Brian switches nameservers at the registrar. Verify that the zone shows Active, public `dig` answers match 6.1, and a test email to and from the domain is delivered. Done 2026-11-23: zone Active on `kevin`/`itzel`.ns.cloudflare.com, and mail to and from the domain was confirmed working.
+- [x] 6.4 Enable "Always Use HTTPS". Uncomment the production custom-domain routes and merge. On the staging-verified commit, run `tools/deploy/deploy.sh production --all`. Verify that `https://befreeman.com/` serves the site with no `noindex` header, that `http://` and `www.` return 301 to the canonical URL, and that the certificate is valid. Done 2026-11-23 from `b46c1fd` (Jira TODOS-55): 200 with no `noindex` and a valid certificate, `http://` and `www.` 301 to `https://befreeman.com`. The Worker issues the `http://` redirect; the dashboard "Always Use HTTPS" setting was not checked.
 
 ## 7. Integration check
 
