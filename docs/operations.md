@@ -119,7 +119,9 @@ The deploy jobs run `tools/deploy/deploy.sh` unchanged. Staging deploys, runs th
    | `CLOUDFLARE_ACCOUNT_ID` | the account ID        | the same account ID |
    | `PREVIEW_SECRET`        | staging's value       | production's value  |
 
-   The preview secrets are the values already in the password manager and in each Worker (`wrangler secret put`).
+   The preview secrets are the values already in the password manager and in each Worker (`wrangler secret put`). Each environment's GitHub `PREVIEW_SECRET` must equal its Worker's secret (production: `wrangler secret put PREVIEW_SECRET` with no `--env`; staging: `--env staging`). When they differ, the smoke check fails with "preview override not applied (no header)" before anything is promoted. To rotate one, set the Worker, the GitHub environment and the password manager together.
+
+   Both environments use the same Cloudflare account ID: production's verification check reads staging's KV, and with the wrong account every staging key reads as missing ("cannot see staging's deploy state").
 
 4. **Actions permissions.** Settings → Actions → General → Workflow permissions can stay **read**: the deploy jobs ask for `contents: write` themselves to push audit tags.
 
