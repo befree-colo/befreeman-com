@@ -26,7 +26,7 @@ Version paths are never overwritten. Promoting or rolling back a version is a si
 
 ## One-time Cloudflare setup
 
-Run these from `apps/edge` with a logged-in Wrangler (`pnpm exec wrangler login`). There is no API token: Cloudflare access is the operator's Wrangler session, and Bitbucket holds no Cloudflare credentials.
+Run these from `apps/edge` with a logged-in Wrangler (`pnpm exec wrangler login`). CI deploys use a separate scoped API token (see [Deploying from GitHub Actions](#deploying-from-github-actions)).
 
 ```bash
 # R2 buckets (production and staging)
@@ -72,7 +72,7 @@ The two URLs at the top of `tools/deploy/deploy.sh` are the smoke-check targets:
 
 ## Deploying
 
-A deploy is one command per environment, run from the workstation by `tools/deploy/deploy.sh` (see [Deploying from the workstation](#deploying-from-the-workstation)). That script wraps `release deploy`, which can also run directly with `--local` for rehearsal.
+A deploy is one run of `tools/deploy/deploy.sh` per environment. GitHub Actions runs it on every push to `main` (see [Deploying from GitHub Actions](#deploying-from-github-actions)), and it can also run from a workstation (see [Deploying from the workstation](#deploying-from-the-workstation)). That script wraps `release deploy`, which can also run directly with `--local` for rehearsal.
 
 ```bash
 PREVIEW_SECRET=… pnpm release deploy --env <staging|production> --base-url https://<site> [--all] [--remote]
@@ -95,9 +95,38 @@ With `--remote`, it refuses a dirty working tree.
 
 `pnpm release status` prints the live manifest and `deploy:commit`.
 
+## Deploying from GitHub Actions
+
+`.github/workflows/ci.yml` runs on GitHub Actions:
+
+| Trigger             | Jobs                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Pull request        | `nx affected` lint, typecheck, test, build. No secrets.                                                                               |
+| Push to `main`      | All checks, the e2e suite (with axe), and Lighthouse CI, then **Deploy staging**, then **Deploy production** after approval.          |
+| Run workflow (main) | The same as a push. Tick **all** to pass `--all` to both deploys (the first deploy after a `release rollback`, or a full re-release). |
+
+The deploy jobs run `tools/deploy/deploy.sh` unchanged. Staging deploys, runs the e2e suite against staging, and marks the commit verified. Production deploys that same commit, so its staging-verified check always passes. Each environment runs one deploy at a time; a newer push queues behind a running deploy rather than cancelling it. The script pushes the `deployed/<env>/<ts>` audit tag with the job's token.
+
+### One-time GitHub setup
+
+1. **Cloudflare API token.** In the Cloudflare dashboard → **My Profile → API Tokens → Create Token**, start from the **Edit Cloudflare Workers** template. Scope it to this account and the `befreeman.com` zone. It needs Workers Scripts, Workers KV Storage and Workers R2 Storage (Edit) on the account, and Workers Routes (Edit) on the zone for the custom domains.
+2. **Environments.** In the GitHub repo → **Settings → Environments**, create `staging` and `production`. Restrict both to the `main` branch. On `production`, add yourself as a **required reviewer**: that's what makes the production deploy wait for approval.
+3. **Environment secrets**, set on each environment (not at the repository level, so pull-request jobs can't read them):
+
+   | Secret                  | `staging`             | `production`        |
+   | ----------------------- | --------------------- | ------------------- |
+   | `CLOUDFLARE_API_TOKEN`  | the token from step 1 | the same token      |
+   | `CLOUDFLARE_ACCOUNT_ID` | the account ID        | the same account ID |
+   | `PREVIEW_SECRET`        | staging's value       | production's value  |
+
+   The preview secrets are the values already in the password manager and in each Worker (`wrangler secret put`).
+4. **Actions permissions.** Settings → Actions → General → Workflow permissions can stay **read**: the deploy jobs ask for `contents: write` themselves to push audit tags.
+
+Tag pushes made with the job's token don't start new workflow runs.
+
 ## Deploying from the workstation
 
-Deploys never run in CI: Bitbucket's free build minutes can't cover them, so Bitbucket runs only the checks. Merging to `main` never deploys.
+The fallback when CI is unavailable. It runs the same script with the same checks. Don't run it while a CI deploy to the same environment is in progress: the two would race on `deploy:commit`.
 
 ### Prerequisites
 
@@ -124,7 +153,7 @@ The script deploys the checked-out commit. Before it builds anything, it stops u
 
 Then it runs `release deploy --remote` (see [Deploying](#deploying)). For staging it also runs the full Playwright suite against the staging URL and then `release mark-verified`.
 
-The normal flow is: merge to `main` → `git checkout main && git pull` → `tools/deploy/deploy.sh staging` → check staging → `tools/deploy/deploy.sh production` on that same commit.
+The workstation flow is: `git checkout main && git pull` → `tools/deploy/deploy.sh staging` → check staging → `tools/deploy/deploy.sh production` on that same commit.
 
 **A specific commit:** check it out (`git checkout <sha>`) and run the script. It must already be on `origin/main`, and production requires that the same commit passed a staging deploy.
 

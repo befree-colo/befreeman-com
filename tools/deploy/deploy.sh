@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# Deploy befreeman.com from the operator's workstation (design D1 of openspec change deploy-to-cloudflare).
+# Deploy befreeman.com. GitHub Actions runs it on every push to main (.github/workflows/ci.yml);
+# it also runs from a workstation as a fallback.
 #
 #   tools/deploy/deploy.sh <staging|production> [--all]
 #
 # Deploys the checked-out commit. To deploy a specific commit, check it out first.
 # --all releases every part: use it for the first deploy to an environment and after a rollback.
-# Needs: a clean tree whose HEAD is on origin/main, `wrangler login`, and that environment's
-# PREVIEW_SECRET exported from the password manager. See docs/operations.md.
+# Needs: a clean tree whose HEAD is on origin/main, Cloudflare access (CLOUDFLARE_API_TOKEN and
+# CLOUDFLARE_ACCOUNT_ID in CI, or `wrangler login` on a workstation), and that environment's
+# PREVIEW_SECRET. See docs/operations.md.
 set -euo pipefail
 
 # Not secrets. Replace the subdomain once the Cloudflare account exists (dashboard → Workers & Pages).

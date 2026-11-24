@@ -1,0 +1,29 @@
+name: Setup
+description: pnpm and Node pinned from the repo, dependencies installed, optionally Playwright Chromium.
+
+inputs:
+  playwright:
+    description: Install Playwright Chromium and its system dependencies.
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    # Version comes from package.json `packageManager`.
+    - uses: pnpm/action-setup@v4
+
+    # Exact version from .nvmrc: deploy.sh refuses a Node that doesn't match it.
+    - uses: actions/setup-node@v5
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Install Playwright Chromium
+      if: inputs.playwright == 'true'
+      shell: bash
+      working-directory: apps/e2e
+      run: pnpm exec playwright install --with-deps chromium
