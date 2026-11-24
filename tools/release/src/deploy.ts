@@ -85,6 +85,14 @@ export async function assertVerifiedOnStaging(
       await new Promise((resolve) => setTimeout(resolve, wait.delayMs));
     }
   }
+  // Staging always has deploy:commit after its first deploy. If that is missing too, these credentials are
+  // probably reading another account (a different CLOUDFLARE_ACCOUNT_ID or token), where every key 404s.
+  if (!(await stagingStores.manifests.get(DEPLOY_COMMIT))) {
+    throw new ReleaseError(
+      `cannot see staging's deploy state: ${DEPLOY_COMMIT} is missing from the staging KV namespace too. Either staging was never deployed, or this job's CLOUDFLARE_ACCOUNT_ID / CLOUDFLARE_API_TOKEN point at a different account than staging's.`,
+      'not-verified',
+    );
+  }
   throw new ReleaseError(
     `commit ${head.slice(0, 7)} has not been verified on staging. Deploy it to staging first (run tools/deploy/deploy.sh staging on this commit); production only receives commits whose staging e2e run passed.`,
     'not-verified',
