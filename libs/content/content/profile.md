@@ -6,7 +6,6 @@ location: Golden, Colorado
 links:
   - { label: LinkedIn, url: "https://www.linkedin.com/in/befreeman/", kind: linkedin }
   - { label: GitHub, url: "https://github.com/befree-colo/", kind: github }
-  - { label: Bitbucket, url: "https://bitbucket.org/befree/workspace/repositories/", kind: bitbucket }
 placeholder: true # LinkedIn and public Git URLs
 ---
 I'm a principal software engineer with more than two decades of experience architecting and delivering resilient

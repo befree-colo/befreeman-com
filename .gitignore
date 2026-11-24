@@ -61,6 +61,6 @@ graph.json
 *.tsbuildinfo
 .angular/
 
-# CI pnpm store (Bitbucket Pipelines cache)
+# pnpm store, if one is ever placed in the repo
 .pnpm-store/
 .lighthouseci/
