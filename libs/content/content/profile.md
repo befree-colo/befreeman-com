@@ -6,7 +6,6 @@ location: Golden, Colorado
 links:
   - { label: LinkedIn, url: "https://www.linkedin.com/in/befreeman/", kind: linkedin }
   - { label: GitHub, url: "https://github.com/befree-colo/", kind: github }
-placeholder: true # LinkedIn and public Git URLs
 ---
 I'm a principal software engineer with more than two decades of experience architecting and delivering resilient
 on-premise and cloud-based solutions. My expertise spans high-availability systems, multi-system integration,
