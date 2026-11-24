@@ -39,7 +39,7 @@ Nx tags and lint rules keep the boundaries:
 
 ## Prerequisites
 
-- Node.js **22.12+** (see `.nvmrc`)
+- Node.js **22.22.3+** (see `.nvmrc`; Angular's build tools require it)
 - pnpm **10** (`npm i -g pnpm@10`)
 - Chromium for browser tests: `pnpm exec playwright install chromium`
 - For deployment only: a Cloudflare account (see [docs/operations.md](docs/operations.md))
