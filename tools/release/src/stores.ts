@@ -91,14 +91,21 @@ export function wranglerStores(opts: { cwd: string; bucket: string; env?: string
     },
     manifests: {
       get: async (key) => {
+        let stdout: string;
         try {
-          const { stdout } = await wrangler(['kv', 'key', 'get', key, '--binding', 'MANIFESTS', where, '--text']);
-          const value = stdout.trim();
-          // Wrangler exits 0 and prints this for a missing key.
-          return !value || value === 'Value not found' ? null : value;
-        } catch {
-          return null;
+          ({ stdout } = await wrangler(['kv', 'key', 'get', key, '--binding', 'MANIFESTS', where, '--text']));
+        } catch (e) {
+          // Only a missing key means "no value". Anything else (bad token, missing permission, wrong
+          // account, network) must surface: swallowing it made production report a verified commit as
+          // unverified.
+          const err = e as { stdout?: string; stderr?: string; message?: string };
+          const out = `${err.stdout ?? ''}\n${err.stderr ?? ''}`;
+          if (/Value not found/i.test(out)) return null;
+          throw new Error(`wrangler kv key get ${key} failed:\n${out.trim() || err.message}`);
         }
+        const value = stdout.trim();
+        // Wrangler exits 0 and prints this for a missing key.
+        return !value || value === 'Value not found' ? null : value;
       },
       put: async (key, value) => {
         await wrangler(['kv', 'key', 'put', key, value, '--binding', 'MANIFESTS', where]);
