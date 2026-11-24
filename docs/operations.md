@@ -60,7 +60,7 @@ The Worker serves `befreeman.com` and `www.befreeman.com` as Workers custom doma
 4. Deploy production (`tools/deploy/deploy.sh production --all`). The deploy attaches both hostnames and creates their DNS records (shown as Worker records) and certificates. Don't create or edit those records by hand.
 5. Check: `curl -I https://befreeman.com/` returns 200 and `curl -I https://www.befreeman.com/` returns 301 to `https://befreeman.com/`. The domains are listed under **Workers & Pages → befreeman-edge → Settings → Domains & Routes**.
 
-With `routes` set, Wrangler doesn't serve production on `workers.dev`. Staging sets `"routes": []` (routes are otherwise inherited) and is reachable only at its `*.workers.dev` URL.
+With `routes` set, Wrangler doesn't serve production on `workers.dev`. Staging sets its own `routes` (they're otherwise inherited, which would move production's domains): the custom domain `staging.befreeman.com`. With routes set, Wrangler turns off `workers.dev` by default too, so if `befreeman-edge-staging.boldertechnologies.workers.dev` stops answering after a deploy, that's why; add `"workers_dev": true` to the staging section to keep it.
 
 **Keep Cloudflare Web Analytics automatic setup off** for the zone (Analytics & Logs → Web Analytics). It injects `static.cloudflareinsights.com/beacon.min.js` into every HTML page, which the CSP (`script-src 'self'`) blocks: the beacon never reports, and the e2e suite fails on the console error and CSP violation. Zone Analytics and Worker observability give traffic numbers without client-side script.
 
