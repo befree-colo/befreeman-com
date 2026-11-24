@@ -31,6 +31,10 @@ jobs:
     name: Affected checks
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    # Chromium and its system libraries preinstalled. Keep the tag equal to @playwright/test in package.json.
+    container: &playwright
+      image: mcr.microsoft.com/playwright:v1.65.0-noble
+      options: --ipc=host # Chromium needs more shared memory than Docker's default
     timeout-minutes: 25
     concurrency:
       group: pr-${{ github.event.pull_request.number }}
@@ -39,21 +43,18 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # nx affected compares against the base branch
-      - uses: ./.github/actions/setup
-        with:
-          playwright: 'true' # browser-mode unit tests
+      - uses: ./.github/actions/setup # browser-mode unit tests use the image's Chromium
       - run: pnpm nx affected -t lint typecheck test build --base="origin/${{ github.base_ref }}" --head=HEAD
 
   checks:
     name: All checks, e2e (axe), Lighthouse CI
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    container: *playwright
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup
-        with:
-          playwright: 'true'
       # All projects, not `affected`: a push can carry several commits.
       - run: pnpm nx run-many -t lint typecheck test build
       - run: pnpm nx run e2e:e2e
@@ -73,6 +74,7 @@ jobs:
     name: Deploy staging
     needs: checks
     runs-on: ubuntu-latest
+    container: *playwright
     timeout-minutes: 30
     environment:
       name: staging
@@ -91,15 +93,14 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # deploy.sh checks HEAD is on origin/main; the planner diffs against deploy:commit
-      - uses: ./.github/actions/setup
-        with:
-          playwright: 'true' # smoke checks and the e2e suite against staging
+      - uses: ./.github/actions/setup # smoke checks and the e2e suite against staging use the image's Chromium
       - run: tools/deploy/deploy.sh staging ${{ inputs.all && '--all' || '' }}
 
   deploy-production:
     name: Deploy production
     needs: deploy-staging
     runs-on: ubuntu-latest
+    container: *playwright
     timeout-minutes: 30
     # Add a required reviewer to the `production` environment (Settings -> Environments) so this
     # job waits for approval. Without one it deploys right after staging.
@@ -119,7 +120,5 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup
-        with:
-          playwright: 'true' # promotion smoke checks
+      - uses: ./.github/actions/setup # promotion smoke checks use the image's Chromium
       - run: tools/deploy/deploy.sh production ${{ inputs.all && '--all' || '' }}

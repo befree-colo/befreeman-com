@@ -1,18 +1,19 @@
 name: Setup
-description: pnpm and Node pinned from the repo, dependencies installed, optionally Playwright Chromium.
-
-inputs:
-  playwright:
-    description: Install Playwright Chromium and its system dependencies.
-    default: 'false'
+description: pnpm and Node pinned from the repo, dependencies installed. Jobs run in the Playwright image, so browsers are already there.
 
 runs:
   using: composite
   steps:
+    # The container runs as root but the checkout belongs to the runner user; without this, git
+    # (nx affected, deploy.sh's origin/main check and audit tag) refuses the repository.
+    - name: Trust the checkout
+      shell: bash
+      run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
     # Version comes from package.json `packageManager`.
     - uses: pnpm/action-setup@v4
 
-    # Exact version from .nvmrc: deploy.sh refuses a Node that doesn't match it.
+    # Exact version from .nvmrc: deploy.sh refuses a Node that doesn't match it (the image ships its own).
     - uses: actions/setup-node@v5
       with:
         node-version-file: .nvmrc
@@ -21,9 +22,3 @@ runs:
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
-
-    - name: Install Playwright Chromium
-      if: inputs.playwright == 'true'
-      shell: bash
-      working-directory: apps/e2e
-      run: pnpm exec playwright install --with-deps chromium
