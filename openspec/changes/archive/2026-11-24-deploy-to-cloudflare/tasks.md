@@ -23,16 +23,16 @@
 
 ## 4. Cloudflare resources and secrets (D6) — Brian runs the account steps, Claude prepares the commands
 
-- [ ] 4.1 Create the R2 buckets and KV namespaces for both environments, and put the real KV IDs in `wrangler.jsonc`. Verify with `wrangler r2 bucket list`, `wrangler kv namespace list`, and `wrangler deploy --dry-run --env staging`.
-- [ ] 4.2 Set a separate random `PREVIEW_SECRET` per environment with `wrangler secret put`. Verify with `wrangler secret list [--env staging]`.
-- [ ] 4.3 Run `wrangler login` on the workstation and save each environment's `PREVIEW_SECRET` in the password manager (D6). Verify with `wrangler whoami`, and confirm that Bitbucket's repository and deployment variables contain no Cloudflare credentials or preview secrets.
+- [x] 4.1 Create the R2 buckets and KV namespaces for both environments, and put the real KV IDs in `wrangler.jsonc`. Verify with `wrangler r2 bucket list`, `wrangler kv namespace list`, and `wrangler deploy --dry-run --env staging`. Done 2026-11-23: buckets `befreeman-artifacts`/`-staging` and namespaces `MANIFESTS`/`staging-MANIFESTS` exist with the IDs in `wrangler.jsonc`; rechecked 2026-11-24.
+- [x] 4.2 Set a separate random `PREVIEW_SECRET` per environment with `wrangler secret put`. Verify with `wrangler secret list [--env staging]`. Done 2026-11-23; `wrangler secret list` shows `PREVIEW_SECRET` on both Workers (2026-11-24). Production's was reset on 2026-11-24 to match the GitHub environment.
+- [x] 4.3 Run `wrangler login` on the workstation and save each environment's `PREVIEW_SECRET` in the password manager (D6). Verify with `wrangler whoami`, and confirm that Bitbucket's repository and deployment variables contain no Cloudflare credentials or preview secrets. Done 2026-11-23 (`wrangler whoami`: OAuth login). The repository has since moved to GitHub and the Bitbucket pipeline was removed; CI-held credentials are covered by the deploy-from-github-actions change.
 
 ## 5. Staging: first deploy and verification
 
 - [x] 5.1 Run `tools/deploy/deploy.sh staging --all`. Verify the run passes, including the e2e suite against staging with CSP under the real Worker headers; that `release status --remote --env staging` shows every part; and that staging responses carry `X-Robots-Tag: noindex`; and that a `deployed/staging/...` tag was pushed. Done 2026-11-23 on `6d41203` from the workstation; `noindex` rechecked on `https://staging.befreeman.com` 2026-11-24.
 - [x] 5.2 Run every release command against staging (`publish`, `promote` with a smoke check, `preview-link`, `status`, duplicate publish refused, `rollback`). Verify by adding a row to the runbook's verification log. Done 2026-11-24; logged in docs/operations.md.
 - [x] 5.3 Rollback drill: publish a deliberately broken remote, promote it with `--skip-smoke`, confirm the static fallback and the "unavailable" notice, then `release rollback`. Verify that new page loads use the prior version, and record the drill in `docs/operations.md`. Done 2026-11-24 with `timeline@0.0.0-drill-broken`; recorded under "Rollback drill".
-- [ ] 5.4 Make a timeline-only commit and run `tools/deploy/deploy.sh staging` without `--all`. Verify from the run's output and `release status` that only the timeline was published and promoted. The 2026-11-24 `4e40950` run went out with `--all` (every part promoted), so it doesn't count; to be re-checked through CI with a fresh timeline-only commit.
+- [x] 5.4 Make a timeline-only commit and run `tools/deploy/deploy.sh staging` without `--all`. Verify from the run's output and `release status` that only the timeline was published and promoted. The 2026-11-24 `4e40950` run went out with `--all` (every part promoted), so it doesn't count. Done 2026-11-24 through CI on `51c5e52`: only `timeline` was published and promoted.
 
 ## 6. DNS move and production (D5)
 
