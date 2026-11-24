@@ -220,7 +220,8 @@ describe('deploy', () => {
 
 describe('production receives what staging verified', () => {
   it('an unverified commit stops before any build or publish, with an explanation', async () => {
-    const h = await harness({ stores: production, env: 'production', head: SHA_A });
+    await firstDeploy(staging);
+    const h = await harness({ stores: production, env: 'production', head: SHA_B });
     await expect(deploy(h.deps)).rejects.toThrow(/has not been verified on staging\. Deploy it to staging first/);
     expect(h.built).toEqual([]);
     expect(await readLive(production)).toBeNull();
@@ -247,7 +248,12 @@ describe('production receives what staging verified', () => {
   });
 
   it('still refuses once the wait runs out', async () => {
-    await expect(assertVerifiedOnStaging(staging, SHA_A, { attempts: 3, delayMs: 1 })).rejects.toMatchObject({ code: 'not-verified' });
+    await firstDeploy(staging);
+    await expect(assertVerifiedOnStaging(staging, SHA_B, { attempts: 3, delayMs: 1 })).rejects.toThrow(/has not been verified on staging/);
+  });
+
+  it('says when the staging namespace looks unreachable rather than unverified', async () => {
+    await expect(assertVerifiedOnStaging(staging, SHA_A)).rejects.toThrow(/cannot see staging's deploy state/);
   });
 
   it('a verified commit deploys to production without changing staging', async () => {
