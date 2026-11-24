@@ -78,7 +78,7 @@ jobs:
     timeout-minutes: 30
     environment:
       name: staging
-      url: https://befreeman-edge-staging.brian-acb.workers.dev
+      url: https://staging.befreeman.com
     # One deploy per environment at a time; queued runs wait instead of cancelling a deploy mid-way.
     concurrency:
       group: deploy-staging

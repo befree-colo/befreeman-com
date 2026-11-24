@@ -68,7 +68,7 @@ Browsers that visited the old site may have cached its 301 from `befreeman.com` 
 
 ### Deploy URLs
 
-The two URLs at the top of `tools/deploy/deploy.sh` are the smoke-check targets: staging is `https://befreeman-edge-staging.brian-acb.workers.dev` and production is `https://befreeman.com`. The URLs aren't secret.
+The two URLs at the top of `tools/deploy/deploy.sh` are the smoke-check and e2e targets: staging is `https://staging.befreeman.com` and production is `https://befreeman.com`. The URLs aren't secret. The Workers' own URLs are on the account's `boldertechnologies.workers.dev` subdomain (`befreeman-edge-staging.boldertechnologies.workers.dev`); production doesn't serve one because it has custom domains. `staging.befreeman.com` is a custom domain on the staging Worker, so if staging is ever put behind Cloudflare Access, point `STAGING_URL` back at the `workers.dev` URL or CI can't reach it.
 
 ## Deploying
 
