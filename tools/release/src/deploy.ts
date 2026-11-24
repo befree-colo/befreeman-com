@@ -68,7 +68,7 @@ export interface DeployResult {
 export async function assertVerifiedOnStaging(stagingStores: Stores, head: string): Promise<void> {
   if (!(await stagingStores.manifests.get(`${VERIFIED_PREFIX}${head}`))) {
     throw new ReleaseError(
-      `commit ${head.slice(0, 7)} has not been verified on staging. Deploy it to staging first (run the deploy-staging pipeline for this commit); production only receives commits whose staging e2e run passed.`,
+      `commit ${head.slice(0, 7)} has not been verified on staging. Deploy it to staging first (run tools/deploy/deploy.sh staging on this commit); production only receives commits whose staging e2e run passed.`,
       'not-verified',
     );
   }
@@ -92,7 +92,7 @@ export async function deploy(d: DeployDeps): Promise<DeployResult> {
   const live = await readLive(d.stores);
   let base: string | null = null;
   let affected: string[] | null = null;
-  if (d.all) d.log('plan: everything (--all / DEPLOY_ALL)');
+  if (d.all) d.log('plan: everything (--all)');
   else if (!live) d.log('plan: everything (no live manifest: first deploy)');
   else if (!recorded) d.log('plan: everything (no recorded deploy commit)');
   else {

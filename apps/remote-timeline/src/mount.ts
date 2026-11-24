@@ -6,7 +6,7 @@ import css from './styles.css?inline';
 import Timeline from './components/Timeline.vue';
 import { STORE, createTimelineStore } from './store';
 
-/** Career timeline remote (Vue). Exposed as `./mount`. */
+/** Career timeline remote (Vue). Exposed as `./mount`; the shell mounts it into a shadow root. */
 export const mount = defineRemote<CareerContentBundle>(async (el, ctx) => {
   const root = el.getRootNode();
   if (root instanceof ShadowRoot) adoptStyles(root, createShadowStyles(css));
