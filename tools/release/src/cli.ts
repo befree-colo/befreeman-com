@@ -172,6 +172,8 @@ async function main() {
         env: values.env,
         head: git(['rev-parse', 'HEAD']),
         all: values.all,
+        // Remote KV is eventually consistent: give staging's fresh verification marker ~90s to appear.
+        ...(mode === 'remote' ? { verifyWait: { attempts: 10, delayMs: 10_000 } } : {}),
         affected: async (base) => {
           try {
             git(['cat-file', '-e', `${base}^{commit}`]);

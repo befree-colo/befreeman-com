@@ -44,6 +44,12 @@ export interface DeployDeps {
   head: string;
   /** Force a full release (first deploy, after a rollback). */
   all?: boolean;
+  /**
+   * How long a production deploy keeps re-checking staging's verification marker. KV is eventually
+   * consistent: a marker staging wrote seconds ago can read as missing from another location for up
+   * to about a minute. Default: one check, no waiting.
+   */
+  verifyWait?: { attempts: number; delayMs: number };
   /** Nx projects affected between `base` and HEAD, or null when `base` is not in this checkout's history. */
   affected(base: string): Promise<string[] | null>;
   /** Build the planned parts plus the shell and pre-rendered pages. */
@@ -65,13 +71,24 @@ export interface DeployResult {
 }
 
 /** Refuse a production deploy unless staging verified exactly this commit. */
-export async function assertVerifiedOnStaging(stagingStores: Stores, head: string): Promise<void> {
-  if (!(await stagingStores.manifests.get(`${VERIFIED_PREFIX}${head}`))) {
-    throw new ReleaseError(
-      `commit ${head.slice(0, 7)} has not been verified on staging. Deploy it to staging first (run tools/deploy/deploy.sh staging on this commit); production only receives commits whose staging e2e run passed.`,
-      'not-verified',
-    );
+export async function assertVerifiedOnStaging(
+  stagingStores: Stores,
+  head: string,
+  wait: { attempts: number; delayMs: number } = { attempts: 1, delayMs: 0 },
+  log?: (line: string) => void,
+): Promise<void> {
+  const key = `${VERIFIED_PREFIX}${head}`;
+  for (let attempt = 1; attempt <= wait.attempts; attempt++) {
+    if (await stagingStores.manifests.get(key)) return;
+    if (attempt < wait.attempts) {
+      log?.(`verify: staging's marker for ${head.slice(0, 7)} not visible yet; re-checking in ${wait.delayMs / 1000}s (${attempt}/${wait.attempts})`);
+      await new Promise((resolve) => setTimeout(resolve, wait.delayMs));
+    }
   }
+  throw new ReleaseError(
+    `commit ${head.slice(0, 7)} has not been verified on staging. Deploy it to staging first (run tools/deploy/deploy.sh staging on this commit); production only receives commits whose staging e2e run passed.`,
+    'not-verified',
+  );
 }
 
 export async function markVerified(stagingStores: Stores, head: string, now = new Date()): Promise<void> {
@@ -85,7 +102,7 @@ export async function markVerified(stagingStores: Stores, head: string, now = ne
 export async function deploy(d: DeployDeps): Promise<DeployResult> {
   if (d.env === 'production') {
     if (!d.stagingStores) throw new ReleaseError('a production deploy needs staging stores for the verification check', 'invalid');
-    await assertVerifiedOnStaging(d.stagingStores, d.head);
+    await assertVerifiedOnStaging(d.stagingStores, d.head, d.verifyWait, d.log);
   }
 
   const recorded = await d.stores.manifests.get(DEPLOY_COMMIT);

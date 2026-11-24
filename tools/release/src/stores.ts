@@ -100,7 +100,8 @@ export function wranglerStores(opts: { cwd: string; bucket: string; env?: string
           // unverified.
           const err = e as { stdout?: string; stderr?: string; message?: string };
           const out = `${err.stdout ?? ''}\n${err.stderr ?? ''}`;
-          if (/Value not found/i.test(out)) return null;
+          // Wrangler 4 reports a missing remote key as a 404 from the values endpoint.
+          if (/Value not found|404: Not Found/i.test(out)) return null;
           throw new Error(`wrangler kv key get ${key} failed:\n${out.trim() || err.message}`);
         }
         const value = stdout.trim();

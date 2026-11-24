@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Miniflare } from 'miniflare';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ALL_PARTS, DEPLOY_COMMIT, VERIFIED_PREFIX, deploy, markVerified, planDeploy } from './deploy';
+import { ALL_PARTS, DEPLOY_COMMIT, VERIFIED_PREFIX, assertVerifiedOnStaging, deploy, markVerified, planDeploy } from './deploy';
 import type { DeployDeps, DeployPart } from './deploy';
 import { LIVE, ReleaseError, readLive } from './release';
 import type { SmokeCheck } from './release';
@@ -231,6 +231,23 @@ describe('production receives what staging verified', () => {
     await firstDeploy(staging);
     const h = await harness({ stores: production, env: 'production', head: SHA_A });
     await expect(deploy(h.deps)).rejects.toMatchObject({ code: 'not-verified' });
+  });
+
+  it('waits for a verification marker that is not visible yet (eventually consistent KV)', async () => {
+    await markVerified(staging, SHA_A);
+    let reads = 0;
+    const lagging: Stores = {
+      ...staging,
+      manifests: { ...staging.manifests, get: async (key) => (++reads < 3 ? null : staging.manifests.get(key)) },
+    };
+    const logs: string[] = [];
+    await assertVerifiedOnStaging(lagging, SHA_A, { attempts: 5, delayMs: 1 }, (l) => logs.push(l));
+    expect(reads).toBe(3);
+    expect(logs).toHaveLength(2);
+  });
+
+  it('still refuses once the wait runs out', async () => {
+    await expect(assertVerifiedOnStaging(staging, SHA_A, { attempts: 3, delayMs: 1 })).rejects.toMatchObject({ code: 'not-verified' });
   });
 
   it('a verified commit deploys to production without changing staging', async () => {
