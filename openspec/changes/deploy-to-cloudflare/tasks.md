@@ -29,10 +29,10 @@
 
 ## 5. Staging: first deploy and verification
 
-- [ ] 5.1 Run `tools/deploy/deploy.sh staging --all`. Verify the run passes, including the e2e suite against staging with CSP under the real Worker headers; that `release status --remote --env staging` shows every part; and that staging responses carry `X-Robots-Tag: noindex`; and that a `deployed/staging/...` tag was pushed.
-- [ ] 5.2 Run every release command against staging (`publish`, `promote` with a smoke check, `preview-link`, `status`, duplicate publish refused, `rollback`). Verify by adding a row to the runbook's verification log.
-- [ ] 5.3 Rollback drill: publish a deliberately broken remote, promote it with `--skip-smoke`, confirm the static fallback and the "unavailable" notice, then `release rollback`. Verify that new page loads use the prior version, and record the drill in `docs/operations.md`.
-- [ ] 5.4 Make a timeline-only commit and run `tools/deploy/deploy.sh staging` without `--all`. Verify from the run's output and `release status` that only the timeline was published and promoted.
+- [x] 5.1 Run `tools/deploy/deploy.sh staging --all`. Verify the run passes, including the e2e suite against staging with CSP under the real Worker headers; that `release status --remote --env staging` shows every part; and that staging responses carry `X-Robots-Tag: noindex`; and that a `deployed/staging/...` tag was pushed. Done 2026-11-23 on `6d41203` from the workstation; `noindex` rechecked on `https://staging.befreeman.com` 2026-11-24.
+- [x] 5.2 Run every release command against staging (`publish`, `promote` with a smoke check, `preview-link`, `status`, duplicate publish refused, `rollback`). Verify by adding a row to the runbook's verification log. Done 2026-11-24; logged in docs/operations.md.
+- [x] 5.3 Rollback drill: publish a deliberately broken remote, promote it with `--skip-smoke`, confirm the static fallback and the "unavailable" notice, then `release rollback`. Verify that new page loads use the prior version, and record the drill in `docs/operations.md`. Done 2026-11-24 with `timeline@0.0.0-drill-broken`; recorded under "Rollback drill".
+- [ ] 5.4 Make a timeline-only commit and run `tools/deploy/deploy.sh staging` without `--all`. Verify from the run's output and `release status` that only the timeline was published and promoted. The 2026-11-24 `4e40950` run went out with `--all` (every part promoted), so it doesn't count; to be re-checked through CI with a fresh timeline-only commit.
 
 ## 6. DNS move and production (D5)
 
@@ -43,7 +43,7 @@
 
 ## 7. Integration check
 
-- [x] 7.1 7.1 Run the Playwright suite against `https://befreeman.com` (`E2E_BASE_URL`). Verify that all tests pass, and record production in the runbook's verification log. Done 2026-11-23: 74 passed after turning off Cloudflare Web Analytics automatic setup, whose injected beacon the CSP blocked.
+- [x] 7.1 Run the Playwright suite against `https://befreeman.com` (`E2E_BASE_URL`). Verify that all tests pass, and record production in the runbook's verification log. Done 2026-11-23: 74 passed after turning off Cloudflare Web Analytics automatic setup, whose injected beacon the CSP blocked.
 
 ## Workflow follow-up
 
