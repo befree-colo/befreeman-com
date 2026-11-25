@@ -1,0 +1,37 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "remote-patents",
+  "projectType": "application",
+  "sourceRoot": "apps/remote-patents/src",
+  "tags": [
+    "type:remote",
+    "framework:svelte"
+  ],
+  "targets": {
+    "build": {
+      "command": "vite build",
+      "options": {
+        "cwd": "{projectRoot}"
+      },
+      "inputs": [
+        "production",
+        "^production"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/remote-patents"
+      ]
+    },
+    "typecheck": {
+      "command": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test": {
+      "command": "vitest run",
+      "options": {
+        "cwd": "{projectRoot}"
+      }
+    }
+  }
+}

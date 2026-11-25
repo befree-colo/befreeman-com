@@ -71,7 +71,7 @@ test.describe('discovery files', () => {
 });
 
 test.describe('progressive enhancement', () => {
-  for (const path of ['/skills', '/timeline', `/achievements/${bundle.achievements[0]!.id}`]) {
+  for (const path of ['/skills', '/timeline', '/patents', `/achievements/${bundle.achievements[0]!.id}`]) {
     test(`remote takeover on ${path} keeps layout shift at or below 0.1`, async ({ page }) => {
       await page.addInitScript(() => {
         (window as unknown as { __cls: number }).__cls = 0;

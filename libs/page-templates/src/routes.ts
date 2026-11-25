@@ -1,4 +1,4 @@
-export const REMOTE_NAMES = ['achievements', 'timeline', 'skills'] as const;
+export const REMOTE_NAMES = ['achievements', 'timeline', 'skills', 'patents'] as const;
 export type RemoteName = (typeof REMOTE_NAMES)[number];
 
 export type RouteKind = 'home' | 'achievements' | 'timeline' | 'skills' | 'patents' | 'not-found';
@@ -20,7 +20,11 @@ export const PREFIXES: Record<RemoteName, string> = {
   achievements: '/achievements',
   timeline: '/timeline',
   skills: '/skills',
+  patents: '/patents',
 };
+
+/** Remotes shown on the home page, in document order. */
+export const HOME_REMOTES: RemoteName[] = ['achievements', 'timeline', 'skills'];
 
 export function normalizePath(path: string): string {
   const clean = path.split(/[?#]/)[0] || '/';
@@ -29,9 +33,7 @@ export function normalizePath(path: string): string {
 
 export function matchRoute(rawPath: string): RouteMatch {
   const path = normalizePath(rawPath);
-  if (path === '/') return { kind: 'home', path, owner: null, subPath: '', slots: [...REMOTE_NAMES] };
-  // Shell pages: rendered by the shell itself, no remote.
-  if (path === '/patents') return { kind: 'patents', path, owner: null, subPath: '', slots: [] };
+  if (path === '/') return { kind: 'home', path, owner: null, subPath: '', slots: [...HOME_REMOTES] };
   for (const name of REMOTE_NAMES) {
     const prefix = PREFIXES[name];
     if (path === prefix || path.startsWith(prefix + '/')) {

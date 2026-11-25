@@ -25,8 +25,8 @@ describe('routes', () => {
     ['/achievements/a/b', 'not-found', null, ''],
     ['/nope', 'not-found', null, ''],
     ['/achievementsx', 'not-found', null, ''],
-    ['/patents', 'patents', null, ''],
-    ['/patents/', 'patents', null, ''],
+    ['/patents', 'patents', 'patents', ''],
+    ['/patents/', 'patents', 'patents', ''],
     ['/patents/x', 'not-found', null, ''],
     ['/patentsx', 'not-found', null, ''],
   ])('%s → %s', (path, kind, owner, subPath) => {
@@ -38,7 +38,7 @@ describe('routes', () => {
     expect(matchRoute('/').slots).toEqual(['achievements', 'timeline', 'skills']);
     expect(matchRoute('/skills').slots).toEqual(['skills']);
     expect(matchRoute('/x').slots).toEqual([]);
-    expect(matchRoute('/patents').slots).toEqual([]);
+    expect(matchRoute('/patents').slots).toEqual(['patents']);
   });
 
   it('normalizes paths and lists pre-render paths', () => {
@@ -102,7 +102,9 @@ describe('views', () => {
     const out = routeView(matchRoute('/patents'), bundle).__html;
     expect(bundle.patents).toHaveLength(12);
     expect(out).toContain('12 issued U.S. patents');
-    expect(out).not.toContain('data-slot');
+    expect(out.match(/data-slot="[a-z]+"/g)).toEqual(['data-slot="patents"']);
+    // The section heading belongs to the remote, so the fallback keeps it inside the slot.
+    expect(out.indexOf('data-slot="patents"')).toBeLessThan(out.indexOf('<h1 id="patents-heading"'));
     let last = -1;
     for (const p of bundle.patents) {
       const at = out.indexOf(`id="${p.id}"`);

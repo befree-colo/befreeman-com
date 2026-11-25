@@ -78,6 +78,9 @@
   .bf-slot[data-remote-framework='react'] {
     --bf-fw: #149eca;
   }
+  .bf-slot[data-remote-framework='svelte'] {
+    --bf-fw: #ff3e00;
+  }
   .bf-slot[data-remote-state='failed'] {
     --bf-fw: var(--bf-danger);
   }

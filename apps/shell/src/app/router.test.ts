@@ -37,12 +37,12 @@ describe('shell router', () => {
     expect(routes[0]![1]?.kind).toBe('home');
   });
 
-  it('intercepts links to shell pages, which have no owning remote', () => {
+  it('hands /patents to the patents remote', () => {
     document.body.innerHTML = '<a href="/patents">Patents</a>';
     const e = click(document.querySelector('a')!);
     expect(e.defaultPrevented).toBe(true);
     expect(location.pathname).toBe('/patents');
-    expect(routes[0]![0]).toMatchObject({ kind: 'patents', owner: null, subPath: '', slots: [] });
+    expect(routes[0]![0]).toMatchObject({ kind: 'patents', owner: 'patents', subPath: '', slots: ['patents'] });
   });
 
   it('intercepts links inside a remote shadow root (composed path)', () => {

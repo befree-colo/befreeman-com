@@ -1,6 +1,6 @@
 # befreeman.com
 
-Brian Freeman's professional site, built to *be* the portfolio: three micro frontends in **Angular**, **React**, and **Vue**, composed at runtime into one page by a framework-neutral shell and served from the Cloudflare edge.
+Brian Freeman's professional site, built to *be* the portfolio: four micro frontends in **Angular**, **React**, **Vue**, and **Svelte**, composed at runtime into one site by a framework-neutral shell and served from the Cloudflare edge.
 
 - **Runtime composition**: the shell reads `/mfe-manifest.json` and loads each remote with Module Federation 2.0. Every remote is built, versioned, released, and rolled back on its own.
 - **Framework-agnostic contract**: each remote exposes one `mount(el, ctx)` function and renders in its own shadow root. Remotes coordinate only through a typed event bus.
@@ -18,6 +18,7 @@ apps/
   remote-achievements/   Angular 22 (zoneless) remote: achievements & case studies
   remote-timeline/       Vue 3 remote: interactive career timeline
   remote-skills/         React 19 remote: skills radar
+  remote-patents/        Svelte 5 remote: issued patents
   edge/                  Cloudflare Worker: manifest, versioned artifacts, security headers
   e2e/                   Playwright suite + local compose server
 libs/

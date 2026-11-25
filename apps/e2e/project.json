@@ -18,6 +18,7 @@
             "remote-achievements",
             "remote-timeline",
             "remote-skills",
+            "remote-patents",
             "ui-components"
           ],
           "target": "build"
@@ -42,6 +43,7 @@
             "remote-achievements",
             "remote-timeline",
             "remote-skills",
+            "remote-patents",
             "ui-components"
           ],
           "target": "build"
@@ -65,6 +67,7 @@
             "remote-achievements",
             "remote-timeline",
             "remote-skills",
+            "remote-patents",
             "ui-components"
           ],
           "target": "build"

@@ -32,7 +32,7 @@ test.describe('shell routing', () => {
     expect(consoleErrors).toEqual([]);
   });
 
-  test('the Patents nav link renders the shell page client-side, with no remote', async ({ page, consoleErrors }) => {
+  test('the Patents nav link mounts the Svelte patents remote client-side', async ({ page, consoleErrors }) => {
     await page.addInitScript(recordBus);
     await page.goto('/');
     await waitForShell(page);
@@ -41,10 +41,35 @@ test.describe('shell routing', () => {
     await expect(page).toHaveURL('/patents');
     await expect(page.getByRole('heading', { level: 1, name: 'Patents' })).toBeVisible();
     await expect(page).toHaveTitle(/^Patents · /);
-    await expect(page.locator('main li[id]')).toHaveCount(bundle.patents.length);
-    await expect(page.locator('[data-slot]')).toHaveCount(0);
+    const slot = page.locator('[data-slot="patents"]');
+    await expect(slot).toHaveAttribute('data-remote-state', 'mounted');
+    await expect(slot).toHaveAttribute('data-remote-framework', 'svelte');
+    await expect(page.locator('[data-slot]')).toHaveCount(1);
+    // The live list (inside the remote's shadow root) shows every patent.
+    await expect(slot.locator('[data-testid="patents"] > li')).toHaveCount(bundle.patents.length);
     expect(await page.evaluate(() => performance.getEntriesByType('navigation').length)).toBe(before); // no reload
-    expect(await events(page)).toContainEqual({ name: 'route:changed', payload: { path: '/patents', subPath: '', owner: null } });
+    expect(await events(page)).toContainEqual({ name: 'route:changed', payload: { path: '/patents', subPath: '', owner: 'patents' } });
+    expect(consoleErrors).toEqual([]);
+  });
+
+  test('React → Svelte → React navigation mounts and unmounts cleanly', async ({ page, consoleErrors }) => {
+    await page.goto('/skills');
+    await waitForShell(page);
+    const nav = page.getByRole('navigation', { name: 'Primary' });
+    const hosts = () => page.locator('.bf-remote-host');
+    await expect(page.locator('[data-slot="skills"]')).toHaveAttribute('data-remote-state', 'mounted');
+
+    await nav.getByRole('link', { name: 'Patents' }).click();
+    await expect(page.locator('[data-slot="patents"]')).toHaveAttribute('data-remote-state', 'mounted');
+    await expect(page.locator('[data-slot="skills"]')).toHaveCount(0);
+    await expect(hosts()).toHaveCount(1);
+
+    await nav.getByRole('link', { name: 'Skills' }).click();
+    await expect(page.locator('[data-slot="skills"]')).toHaveAttribute('data-remote-state', 'mounted');
+    await expect(page.locator('[data-slot="patents"]')).toHaveCount(0);
+    await expect(hosts()).toHaveCount(1);
+    // The skills remote still renders its own content after the Svelte remote left.
+    await expect(page.locator('[data-slot="skills"] .bf-remote-host')).toBeVisible();
     expect(consoleErrors).toEqual([]);
   });
 

@@ -42,7 +42,7 @@ export function footer(b: CareerContentBundle): SafeHtml {
         : ''}
       ${contactLinks(b)}
     </div>
-    <p class="mt-12 text-sm text-ink-muted">© ${b.profile.name}. Built as runtime-composed micro frontends: Angular, React, and Vue in one page.</p>
+    <p class="mt-12 text-sm text-ink-muted">© ${b.profile.name}. Built as runtime-composed micro frontends: Angular, React, Vue, and Svelte in one site.</p>
   </div>`;
 }
 

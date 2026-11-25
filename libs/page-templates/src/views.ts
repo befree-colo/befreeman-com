@@ -14,6 +14,7 @@ const SLOT_MIN_HEIGHT: Record<RemoteName, string> = {
   achievements: 'min-h-[28rem]',
   timeline: 'min-h-[32rem]',
   skills: 'min-h-[30rem]',
+  patents: 'min-h-[40rem]',
 };
 
 function slot(name: RemoteName, inner: SafeHtml, labelledBy?: string): SafeHtml {
@@ -221,8 +222,11 @@ export function routeView(route: RouteMatch, b: CareerContentBundle): SafeHtml {
     case 'patents': {
       const n = b.patents.length;
       return html`<div class="py-16">
-        ${sectionHead('patents-heading', 'Inventions', 'Patents', `${n} issued U.S. patent${n === 1 ? '' : 's'}, each linked to its public record on Google Patents.`, 1)}
-        ${patentsList(b)}
+        ${slot(
+          'patents',
+          html`${sectionHead('patents-heading', 'Inventions', 'Patents', `${n} issued U.S. patent${n === 1 ? '' : 's'}, each linked to its public record on Google Patents.`, 1)}
+            ${patentsList(b)}`,
+        )}
       </div>`;
     }
     case 'not-found':
