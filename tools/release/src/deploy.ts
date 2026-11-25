@@ -163,6 +163,9 @@ export async function deploy(d: DeployDeps): Promise<DeployResult> {
 
   // Promote.
   const promoted: string[] = [];
+  // Remotes absent from the live manifest (a first release) are promoted after the Worker deploy:
+  // their page ships with the new shell, so the smoke check can only find their slot then.
+  const afterWorker: DeployPart[] = [];
   let initialized = false;
   if (!live) {
     const remotes = Object.fromEntries(plan.filter((p) => p !== 'ui' && p !== 'content').map((p) => [p, versionOf(p)]));
@@ -180,6 +183,11 @@ export async function deploy(d: DeployDeps): Promise<DeployResult> {
         d.log(`${part}@${version} is already live`);
         continue;
       }
+      if (part !== 'content' && part !== 'ui' && !current?.remotes[part]) {
+        afterWorker.push(part);
+        d.log(`${part} is a new remote: promoting it after the Worker deploy, which ships its page`);
+        continue;
+      }
       if (part === 'content') await promoteContent(d.stores, { version, url: `/content/content.${version}.json` });
       else await promote(d.stores, part, version, d.smoke);
       promoted.push(`${part}@${version}`);
@@ -189,6 +197,13 @@ export async function deploy(d: DeployDeps): Promise<DeployResult> {
 
   await d.deployWorker();
   d.log('deployed the Worker and shell');
+
+  for (const part of afterWorker) {
+    const version = versionOf(part);
+    await promote(d.stores, part as ArtifactName, version, d.smoke);
+    promoted.push(`${part}@${version}`);
+    d.log(`promoted ${part}@${version}`);
+  }
 
   await d.stores.manifests.put(DEPLOY_COMMIT, d.head);
   d.log(`recorded ${DEPLOY_COMMIT} = ${d.head.slice(0, 7)}`);
