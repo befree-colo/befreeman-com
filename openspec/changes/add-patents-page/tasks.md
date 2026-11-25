@@ -31,7 +31,7 @@
 ## 6. End-to-end checks
 
 - [x] 6.1 Add `/patents` to the page lists in `apps/e2e/tests/a11y.spec.ts`, `csp.spec.ts`, `seo.spec.ts` (pre-rendered content without JavaScript, plus the layout-shift check on remote takeover) and `apps/e2e/lighthouserc.cjs`. Add routing tests: the nav link mounts the `patents` remote (framework `svelte`) with no reload, React → Svelte → React navigation leaves no stray hosts, and the architecture view labels the slot `patents · svelte · <version>`. Verify the full e2e suite and Lighthouse pass locally.
-- [ ] 6.2 After merge, verify on staging that `/patents` lists 12 patents, a sample of the Google Patents links open the right patents, and the page reads well at phone width (the header nav is hidden below the `sm` breakpoint on every page, so on phones `/patents` is reached through the patents achievement). Record the check in the `docs/operations.md` verification log.
+- [x] 6.2 After merge, verify on staging that `/patents` lists 12 patents, a sample of the Google Patents links open the right patents, and the page reads well at phone width (the header nav was hidden below the `sm` breakpoint; TODOS-62 shows it on phones). Record the check in the `docs/operations.md` verification log.
 
 ## Workflow follow-up
 
