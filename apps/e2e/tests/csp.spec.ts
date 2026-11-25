@@ -16,7 +16,7 @@ const recordViolations = () => {
 
 test.describe('content security policy', () => {
   test('pages are served with a strict script policy', async ({ request }) => {
-    for (const path of ['/', '/achievements', '/timeline', '/skills', '/not-a-page']) {
+    for (const path of ['/', '/achievements', '/timeline', '/skills', '/patents', '/not-a-page']) {
       const res = await request.get(path);
       const csp = res.headers()['content-security-policy'] ?? '';
       const scriptSrc =

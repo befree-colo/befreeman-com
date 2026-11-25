@@ -7,11 +7,12 @@ import { encodeContact } from './obfuscate';
 import {
   achievementSchema,
   caseStudySchema,
+  patentSchema,
   profileSchema,
   roleSchema,
   skillsFileSchema,
 } from './schema';
-import type { Achievement, CaseStudy, Profile, Role, Skill, SkillCategory } from './schema';
+import type { Achievement, CaseStudy, Patent, Profile, Role, Skill, SkillCategory } from './schema';
 import { ContentValidationError, sourceKey, validateReferences } from './validate';
 import type { ContentIssue, SourceMap, UnversionedBundle } from './validate';
 
@@ -48,7 +49,7 @@ export interface LoadResult {
 
 /**
  * Reads and validates the content directory:
- *   profile.md, roles/*.md, achievements/*.md, case-studies/*.md, skills.yaml
+ *   profile.md, roles/*.md, achievements/*.md, case-studies/*.md, patents/*.md, skills.yaml
  * Throws ContentValidationError listing every problem found.
  */
 export async function loadContent(contentDir: string): Promise<LoadResult> {
@@ -87,7 +88,7 @@ export async function loadContent(contentDir: string): Promise<LoadResult> {
 
   async function loadDocs<S extends z.ZodType, T>(
     folder: string,
-    type: 'role' | 'achievement' | 'caseStudy',
+    type: 'role' | 'achievement' | 'caseStudy' | 'patent',
     schema: S,
     finish: (parsed: z.infer<S>, bodyHtml: string) => T,
   ): Promise<T[]> {
@@ -118,6 +119,7 @@ export async function loadContent(contentDir: string): Promise<LoadResult> {
     caseStudySchema,
     (c, bodyHtml): CaseStudy => ({ ...c, bodyHtml }),
   );
+  const patents = await loadDocs('patents', 'patent', patentSchema, (p): Patent => p);
 
   // Skills
   const skillsPath = join(contentDir, 'skills.yaml');
@@ -152,6 +154,8 @@ export async function loadContent(contentDir: string): Promise<LoadResult> {
     caseStudies,
     skills,
     skillCategories,
+    // Ties on issue date fall back to the publication number, so the order never depends on file names.
+    patents: patents.sort((a, b) => newestFirst(a.issued, b.issued) || newestFirst(a.number, b.number)),
   };
   issues.push(...validateReferences(content, sources));
   if (issues.length) throw new ContentValidationError(issues);

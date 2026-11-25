@@ -1,6 +1,7 @@
 import type { Achievement, CareerContentBundle, Role, Skill } from '@befreeman/content';
 import { formatYearMonth, html, raw } from './html';
 import type { SafeHtml } from './html';
+import { patentsList } from './patents';
 import type { RemoteName, RouteMatch } from './routes';
 
 /*
@@ -217,6 +218,13 @@ export function routeView(route: RouteMatch, b: CareerContentBundle): SafeHtml {
         ${sectionHead('skills-heading', 'Toolbox', 'Skills', 'What I work with, and where I have proven it.', 1)}
         ${slot('skills', skillsList(b))}
       </div>`;
+    case 'patents': {
+      const n = b.patents.length;
+      return html`<div class="py-16">
+        ${sectionHead('patents-heading', 'Inventions', 'Patents', `${n} issued U.S. patent${n === 1 ? '' : 's'}, each linked to its public record on Google Patents.`, 1)}
+        ${patentsList(b)}
+      </div>`;
+    }
     case 'not-found':
       return notFound();
   }

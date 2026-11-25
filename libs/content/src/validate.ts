@@ -65,6 +65,23 @@ export function validateReferences(content: UnversionedBundle, sources: SourceMa
     for (const s of a.skills) ref('achievement', a.id, 'skills', skills, 'skill', s);
     if (a.caseStudy) ref('achievement', a.id, 'caseStudy', caseStudies, 'caseStudy', a.caseStudy);
   }
+  index('patent', content.patents);
+  const byNumber = new Map<string, string[]>();
+  for (const p of content.patents) byNumber.set(p.number, [...(byNumber.get(p.number) ?? []), p.id]);
+  for (const [number, ids] of byNumber) {
+    if (ids.length < 2) continue;
+    for (const id of ids) {
+      const others = ids.filter((x) => x !== id).map((x) => `"${x}"`).join(', ');
+      issues.push({
+        file: where('patent', id),
+        entity: `patent:${id}`,
+        message: `publication number ${number} is also used by patent ${others}`,
+      });
+    }
+  }
+  for (const p of content.patents) {
+    if (p.role) ref('patent', p.id, 'role', roles, 'role', p.role);
+  }
   for (const c of content.caseStudies) {
     ref('caseStudy', c.id, 'role', roles, 'role', c.role);
     for (const a of c.achievements) ref('caseStudy', c.id, 'achievements', achievements, 'achievement', a);
@@ -79,6 +96,7 @@ export function countPlaceholders(content: UnversionedBundle): PlaceholderReport
     achievement: content.achievements.filter((a) => a.placeholder).length,
     caseStudy: content.caseStudies.filter((c) => c.placeholder).length,
     skill: content.skills.filter((s) => s.placeholder).length,
+    patent: content.patents.filter((p) => p.placeholder).length,
   };
   return { total: Object.values(byType).reduce((a, b) => a + b, 0), byType };
 }

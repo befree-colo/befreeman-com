@@ -11,3 +11,4 @@ metrics:
   - { label: Issued U.S. patents, value: "11" }
 featured: true
 ---
+See [all of my issued patents](/patents), with links to each one on Google Patents.

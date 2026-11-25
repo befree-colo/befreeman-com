@@ -61,6 +61,23 @@ achievements: [cloud-migration]
 ## Problem
 It was slow.
 `,
+  'patents/us11372705b1.md': `---
+title: Intelligent monitoring
+number: US11372705B1
+issued: 2022-06-28
+assignee: Globex
+summary: Watches backups.
+role: globex
+---
+`,
+  'patents/us12155684b2.md': `---
+title: Alert customization
+number: US12155684B2
+issued: 2024-11-26
+assignee: Acme
+summary: Tailors alerts.
+---
+`,
   'skills.yaml': `categories:
   - id: cloud
     name: Cloud

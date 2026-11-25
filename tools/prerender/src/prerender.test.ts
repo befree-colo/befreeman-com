@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { buildBundle } from '@befreeman/content/node';
 import type { CareerContentBundle } from '@befreeman/content';
-import { esc, prerenderPaths } from '@befreeman/page-templates';
+import { esc, patentNumber, patentUrl, prerenderPaths } from '@befreeman/page-templates';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { jsonLdScript, personJsonLd } from './meta';
 import { renderOgImage } from './og';
@@ -37,6 +37,26 @@ describe('renderPage', () => {
       expect(html).toContain(esc(a.summary));
       for (const i of a.impact) expect(html).toContain(esc(i));
     }
+  });
+
+  it('the patents page lists every patent with its number and Google Patents link, without JavaScript', () => {
+    const { html, meta } = renderPage(template, '/patents', b, SITE);
+    expect(b.patents.length).toBeGreaterThan(0);
+    for (const p of b.patents) {
+      expect(html).toContain(esc(p.title));
+      expect(html).toContain(patentNumber(p.number));
+      expect(html).toContain(`href="${patentUrl(p.number)}"`);
+    }
+    expect(html).toContain('data-route-path="/patents"');
+    expect(html).toContain(`<title>Patents · ${esc(b.profile.name)}</title>`);
+    expect(html).toContain('<link rel="canonical" href="https://befreeman.com/patents"');
+    expect(meta.description).toMatch(/^\d+ issued U\.S\. patents from /);
+    expect(meta.imagePath).toBe('/og/patents.png');
+  });
+
+  it('the patents achievement links to the patents page', () => {
+    const { html } = renderPage(template, '/achievements/data-protection-patents', b, SITE);
+    expect(html).toContain('<a href="/patents">all of my issued patents</a>');
   });
 
   it('reserves slot space to keep layout shift low', () => {
@@ -121,6 +141,7 @@ describe('sitemap and robots', () => {
     expect(xml).toContain('<loc>https://befreeman.com/achievements/brand-new-achievement</loc>');
     for (const id of ids) expect(xml).toContain(`<loc>${SITE}/achievements/${id}</loc>`);
     expect(xml).toContain(`<loc>${SITE}/</loc>`);
+    expect(xml).toContain(`<loc>${SITE}/patents</loc>`);
   });
 
   it('robots allows indexing of public pages and points at the sitemap', () => {

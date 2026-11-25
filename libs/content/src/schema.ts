@@ -9,6 +9,16 @@ export const idSchema = z
 /** Year-month, e.g. `2021-04`. */
 export const yearMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'must be YYYY-MM');
 
+/** Calendar date, e.g. `2026-01-20`. */
+export const dateSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/, 'must be YYYY-MM-DD');
+
+/** U.S. publication number: country code, 7–8 digits, kind code, e.g. `US12530268B2`. */
+export const patentNumberSchema = z
+  .string()
+  .regex(/^US\d{7,8}[AB]\d$/, 'must be a U.S. publication number such as US12530268B2');
+
 const placeholder = z.boolean().default(false);
 
 export const linkSchema = z.object({
@@ -73,6 +83,19 @@ export const caseStudySchema = z.object({
   placeholder,
 });
 
+export const patentSchema = z.object({
+  id: idSchema,
+  title: z.string().min(1),
+  number: patentNumberSchema,
+  issued: dateSchema,
+  /** Company the invention was made for, e.g. `Dell`. */
+  assignee: z.string().min(1),
+  summary: z.string().min(1),
+  /** Role the invention was made in. */
+  role: idSchema.optional(),
+  placeholder,
+});
+
 export const skillSchema = z.object({
   id: idSchema,
   name: z.string().min(1),
@@ -98,13 +121,14 @@ export type Role = z.infer<typeof roleSchema> & { bodyHtml: string };
 export type Metric = z.infer<typeof metricSchema>;
 export type Achievement = z.infer<typeof achievementSchema> & { bodyHtml: string };
 export type CaseStudy = z.infer<typeof caseStudySchema> & { bodyHtml: string };
+export type Patent = z.infer<typeof patentSchema>;
 export type Skill = z.infer<typeof skillSchema> & { category: string };
 export type SkillCategory = { id: string; name: string; skills: string[] };
 
 /** Public profile, as published: the raw email is replaced by an obfuscated token. */
 export type Profile = Omit<ProfileInput, 'email'> & { summaryHtml: string; contactToken: string | null };
 
-export type EntityType = 'profile' | 'role' | 'achievement' | 'caseStudy' | 'skill';
+export type EntityType = 'profile' | 'role' | 'achievement' | 'caseStudy' | 'skill' | 'patent';
 
 export interface PlaceholderReport {
   total: number;
@@ -122,5 +146,7 @@ export interface CareerContentBundle {
   caseStudies: CaseStudy[];
   skills: Skill[];
   skillCategories: SkillCategory[];
+  /** Newest issue date first. */
+  patents: Patent[];
   placeholders: PlaceholderReport;
 }

@@ -1,7 +1,7 @@
 export const REMOTE_NAMES = ['achievements', 'timeline', 'skills'] as const;
 export type RemoteName = (typeof REMOTE_NAMES)[number];
 
-export type RouteKind = 'home' | 'achievements' | 'timeline' | 'skills' | 'not-found';
+export type RouteKind = 'home' | 'achievements' | 'timeline' | 'skills' | 'patents' | 'not-found';
 
 export interface RouteMatch {
   kind: RouteKind;
@@ -30,6 +30,8 @@ export function normalizePath(path: string): string {
 export function matchRoute(rawPath: string): RouteMatch {
   const path = normalizePath(rawPath);
   if (path === '/') return { kind: 'home', path, owner: null, subPath: '', slots: [...REMOTE_NAMES] };
+  // Shell pages: rendered by the shell itself, no remote.
+  if (path === '/patents') return { kind: 'patents', path, owner: null, subPath: '', slots: [] };
   for (const name of REMOTE_NAMES) {
     const prefix = PREFIXES[name];
     if (path === prefix || path.startsWith(prefix + '/')) {
@@ -44,5 +46,5 @@ export function matchRoute(rawPath: string): RouteMatch {
 
 /** Every page that should be pre-rendered for the given achievement ids. */
 export function prerenderPaths(achievementIds: string[]): string[] {
-  return ['/', '/achievements', ...achievementIds.map((id) => `/achievements/${id}`), '/timeline', '/skills'];
+  return ['/', '/achievements', ...achievementIds.map((id) => `/achievements/${id}`), '/timeline', '/skills', '/patents'];
 }

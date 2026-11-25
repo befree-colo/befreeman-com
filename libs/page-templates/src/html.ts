@@ -38,3 +38,9 @@ export function formatYearMonth(ym: string | null | undefined): string {
   const [y, m] = ym.split('-');
   return `${MONTHS[Number(m) - 1] ?? ''} ${y}`.trim();
 }
+
+/** `2026-01-20` → `Jan 20, 2026`. */
+export function formatDate(date: string): string {
+  const [y, m, d] = date.split('-');
+  return `${MONTHS[Number(m) - 1] ?? ''} ${Number(d)}, ${y}`;
+}

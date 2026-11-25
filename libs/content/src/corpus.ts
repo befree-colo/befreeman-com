@@ -95,5 +95,11 @@ export function toCorpus(bundle: CareerContentBundle, maxChunk = 800): CorpusChu
       demonstrated.length ? `Demonstrated in: ${demonstrated.join('; ')}.` : undefined,
     ]);
   }
+  for (const pt of bundle.patents) {
+    push('patent', pt.id, pt.title, `/patents#${pt.id}`, [
+      `U.S. patent ${pt.number}, "${pt.title}", issued ${pt.issued}, assigned to ${pt.assignee}${pt.role ? ` (invented as ${roleLabel.get(pt.role) ?? pt.role})` : ''}.`,
+      pt.summary,
+    ]);
+  }
   return chunks;
 }

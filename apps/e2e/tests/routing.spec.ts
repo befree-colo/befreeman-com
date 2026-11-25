@@ -32,6 +32,22 @@ test.describe('shell routing', () => {
     expect(consoleErrors).toEqual([]);
   });
 
+  test('the Patents nav link renders the shell page client-side, with no remote', async ({ page, consoleErrors }) => {
+    await page.addInitScript(recordBus);
+    await page.goto('/');
+    await waitForShell(page);
+    const before = await page.evaluate(() => performance.getEntriesByType('navigation').length);
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Patents' }).click();
+    await expect(page).toHaveURL('/patents');
+    await expect(page.getByRole('heading', { level: 1, name: 'Patents' })).toBeVisible();
+    await expect(page).toHaveTitle(/^Patents · /);
+    await expect(page.locator('main li[id]')).toHaveCount(bundle.patents.length);
+    await expect(page.locator('[data-slot]')).toHaveCount(0);
+    expect(await page.evaluate(() => performance.getEntriesByType('navigation').length)).toBe(before); // no reload
+    expect(await events(page)).toContainEqual({ name: 'route:changed', payload: { path: '/patents', subPath: '', owner: null } });
+    expect(consoleErrors).toEqual([]);
+  });
+
   test('no remote mounts before the shared ui components are defined', async ({ page }) => {
     await page.route('**/ui/**', async (route) => {
       await new Promise((r) => setTimeout(r, 1500));

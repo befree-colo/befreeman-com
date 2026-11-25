@@ -41,7 +41,7 @@ None. Patents fit the existing career content, showcase and discoverability capa
 ## Impact
 
 - `libs/content`: patent schema, the loader reads `patents/*.md`, reference validation of `role`, bundle and placeholder
-  report types, README authoring guide, and new content files under `content/patents/`.
+  report types, career-agent corpus chunks, README authoring guide, and new content files under `content/patents/`.
 - `libs/page-templates`: a `patents` route kind (a shell page with no owner remote), the patents view, the page title,
   and `prerenderPaths`.
 - `apps/shell`: a header nav link. Client-side navigation already renders shell pages through `routeView`.

@@ -17,6 +17,7 @@ function entityIds(bundle: CareerContentBundle): Record<EntityType, Set<string>>
     achievement: new Set(bundle.achievements.map((a) => a.id)),
     caseStudy: new Set(bundle.caseStudies.map((c) => c.id)),
     skill: new Set(bundle.skills.map((s) => s.id)),
+    patent: new Set(bundle.patents.map((p) => p.id)),
   };
 }
 

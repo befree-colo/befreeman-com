@@ -60,6 +60,8 @@ export function pageTitle(route: RouteMatch, b: CareerContentBundle): string {
       return `Career timeline · ${b.profile.name}`;
     case 'skills':
       return `Skills · ${b.profile.name}`;
+    case 'patents':
+      return `Patents · ${b.profile.name}`;
     case 'not-found':
       return `Page not found · ${b.profile.name}`;
   }

@@ -72,6 +72,8 @@ pages, so `microfrontend-composition` doesn't change.
 - **Patents achievement:** the `data-protection-patents` achievement gains a short Markdown body linking to
   `/patents`. The shell's static view and the Angular remote both already render an achievement's body.
 - **Dell role:** the role bullet keeps saying 11, because it describes the Dell work.
+- **Career agent corpus:** `toCorpus` covers every content entity (its tests enforce this), so each patent becomes a corpus
+  chunk pointing at `/patents#<id>`.
 
 **D7. Patent content.**
 - **Source:** titles, numbers and dates are copied exactly from Brian's LinkedIn list.
@@ -87,11 +89,11 @@ pages, so `microfrontend-composition` doesn't change.
 
 - [Summaries misstate a patent] → They're short and plain, and Brian reviews them. The link to the full record is right
   beside each one.
-- [Header nav change breaks visual or a11y baselines] → The e2e visual tests capture the achievement and timeline pages,
-  which include the header. Regenerate the baselines in the same change and check the diff shows only the new nav item.
+- [Header nav change breaks visual or a11y baselines] → The a11y suite covers `/patents`. The visual baselines capture
+  page sections, not the header, so they don't change.
 - [Google Patents changes its URL scheme] → The URL comes from one helper, so a fix is one line and a content rebuild.
-- [Header nav overflows on narrow screens with a fourth item] → Covered by the existing responsive e2e checks. Shorten
-  the gaps if they fail.
+- [No header link on phones] → The header nav is hidden below the `sm` breakpoint on every page, so phone visitors reach
+  `/patents` through the patents achievement. A mobile menu is a separate, site-wide change.
 
 ## Migration Plan
 

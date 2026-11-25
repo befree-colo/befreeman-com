@@ -76,6 +76,47 @@ describe('loadContent', () => {
     expect(issues.join('\n')).toMatch(/achievements references missing achievement id "ghost"/);
   });
 
+  it('loads patents newest issue date first, with an optional role', async () => {
+    const { content } = await load(validFiles());
+    expect(content.patents.map((p) => [p.id, p.number, p.issued, p.role])).toEqual([
+      ['us12155684b2', 'US12155684B2', '2024-11-26', undefined],
+      ['us11372705b1', 'US11372705B1', '2022-06-28', 'globex'],
+    ]);
+  });
+
+  it('treats a missing patents folder as no patents', async () => {
+    const files = validFiles();
+    delete files['patents/us11372705b1.md'];
+    delete files['patents/us12155684b2.md'];
+    const { content } = await load(files);
+    expect(content.patents).toEqual([]);
+  });
+
+  it('fails on a malformed patent number, naming the patent', async () => {
+    const files = validFiles();
+    files['patents/us12155684b2.md'] = files['patents/us12155684b2.md']!.replace('number: US12155684B2', 'number: "12155684"');
+    const issues = await issuesFor(files);
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatch(/^patents\/us12155684b2\.md \[patent:us12155684b2\]: number: must be a U\.S\. publication number/);
+  });
+
+  it('fails on a duplicate patent number, naming both patents', async () => {
+    const files = validFiles();
+    files['patents/us12155684b2.md'] = files['patents/us12155684b2.md']!.replace('US12155684B2', 'US11372705B1');
+    expect(await issuesFor(files)).toEqual([
+      'patents/us12155684b2.md [patent:us12155684b2]: publication number US11372705B1 is also used by patent "us11372705b1"',
+      'patents/us11372705b1.md [patent:us11372705b1]: publication number US11372705B1 is also used by patent "us12155684b2"',
+    ]);
+  });
+
+  it('fails when a patent references a missing role, naming both', async () => {
+    const files = validFiles();
+    files['patents/us11372705b1.md'] = files['patents/us11372705b1.md']!.replace('role: globex', 'role: initech');
+    expect(await issuesFor(files)).toEqual([
+      'patents/us11372705b1.md [patent:us11372705b1]: role references missing role id "initech"',
+    ]);
+  });
+
   it('fails on a duplicate id', async () => {
     const files = validFiles();
     files['achievements/ci-speedup-copy.md'] = files['achievements/ci-speedup.md']!.replace(
@@ -123,7 +164,7 @@ describe('loadContent', () => {
     files['skills.yaml'] = files['skills.yaml']!.replace('proficiency: 5, years: 8', 'proficiency: 5, years: 8, placeholder: true');
     const { content } = await load(files);
     const report = countPlaceholders(content);
-    expect(report).toEqual({ total: 2, byType: { profile: 0, role: 1, achievement: 0, caseStudy: 0, skill: 1 } });
+    expect(report).toEqual({ total: 2, byType: { profile: 0, role: 1, achievement: 0, caseStudy: 0, skill: 1, patent: 0 } });
     expect(formatPlaceholderWarning(report)).toBe(
       '⚠ 2 placeholder content entities remain (role: 1, skill: 1). Replace them before launch.',
     );

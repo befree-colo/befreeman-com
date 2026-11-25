@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, loadBundle, test, waitForShell } from './fixtures';
 
 const bundle = loadBundle();
-const PAGES = ['/', '/achievements', `/achievements/${bundle.achievements[0]!.id}`, '/timeline', '/skills', '/not-a-page'];
+const PAGES = ['/', '/achievements', `/achievements/${bundle.achievements[0]!.id}`, '/timeline', '/skills', '/patents', '/not-a-page'];
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 async function settle(page: import('@playwright/test').Page) {

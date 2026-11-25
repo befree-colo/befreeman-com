@@ -1,4 +1,5 @@
 
+import { patentNumber } from '@befreeman/page-templates';
 import { expect, loadBundle, test } from './fixtures';
 
 const bundle = loadBundle();
@@ -30,6 +31,17 @@ test.describe('crawlable without JavaScript', () => {
     for (const r of bundle.roles) await expect(page.getByRole('heading', { name: r.title, exact: true })).toBeVisible();
     await page.goto('/skills');
     for (const s of bundle.skills) await expect(page.getByText(s.name, { exact: true })).toBeVisible();
+  });
+
+  test('the patents page lists every patent with its number and Google Patents link', async ({ page }) => {
+    const res = await page.goto('/patents');
+    expect(res?.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: 'Patents' })).toBeVisible();
+    for (const p of bundle.patents) {
+      const link = page.getByRole('link', { name: `${p.title} (opens Google Patents in a new tab)`, exact: true });
+      await expect(link).toHaveAttribute('href', `https://patents.google.com/patent/${p.number}/en`);
+      await expect(page.locator(`li#${p.id}`)).toContainText(patentNumber(p.number));
+    }
   });
 
   test('unknown URLs return a 404 page', async ({ page }) => {
