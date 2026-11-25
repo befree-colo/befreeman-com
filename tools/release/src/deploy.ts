@@ -51,6 +51,13 @@ export interface DeployDeps {
    * to about a minute. Default: one check, no waiting.
    */
   verifyWait?: { attempts: number; delayMs: number };
+  /**
+   * How long a new remote's smoke check, which runs right after the Worker deploy, keeps retrying.
+   * A new Worker version reaches Cloudflare's locations gradually: for a few seconds a page can come
+   * from the new version and its hashed stylesheet from the old one, which serves the 404 page instead.
+   * A failed check changes nothing, so retrying is safe. Default: one check, no waiting.
+   */
+  workerSettle?: { attempts: number; delayMs: number };
   /** Nx projects affected between `base` and HEAD, or null when `base` is not in this checkout's history. */
   affected(base: string): Promise<string[] | null>;
   /** Build the planned parts plus the shell and pre-rendered pages. */
@@ -198,9 +205,19 @@ export async function deploy(d: DeployDeps): Promise<DeployResult> {
   await d.deployWorker();
   d.log('deployed the Worker and shell');
 
+  const settle = d.workerSettle ?? { attempts: 1, delayMs: 0 };
   for (const part of afterWorker) {
     const version = versionOf(part);
-    await promote(d.stores, part as ArtifactName, version, d.smoke);
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await promote(d.stores, part as ArtifactName, version, d.smoke);
+        break;
+      } catch (e) {
+        if (!(e instanceof ReleaseError && e.code === 'smoke-failed') || attempt >= settle.attempts) throw e;
+        d.log(`${part}@${version} failed its smoke check while the new Worker rolls out; re-checking in ${settle.delayMs / 1000}s (${attempt}/${settle.attempts})`);
+        await new Promise((resolve) => setTimeout(resolve, settle.delayMs));
+      }
+    }
     promoted.push(`${part}@${version}`);
     d.log(`promoted ${part}@${version}`);
   }
