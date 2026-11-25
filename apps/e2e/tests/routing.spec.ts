@@ -96,6 +96,25 @@ test.describe('shell routing', () => {
     await expect(page.locator('[data-slot="skills"]')).toHaveAttribute('data-remote-state', 'mounted');
   });
 
+  test('navigating before the first page finished mounting mounts each remote once', async ({ page, consoleErrors }) => {
+    await page.addInitScript(recordBus);
+    await page.route('**/ui/**', async (route) => {
+      await new Promise((r) => setTimeout(r, 1500));
+      await route.continue();
+    });
+    await page.goto('/');
+    // The router is live once the first route:changed is published, while the shell still waits for the ui components.
+    await expect.poll(async () => (await events(page)).some((e) => e.name === 'route:changed')).toBe(true);
+    expect(await page.evaluate(() => !!customElements.get('bf-button'))).toBe(false);
+    await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Patents' }).click();
+    await expect(page).toHaveURL('/patents');
+    await waitForShell(page);
+    await expect(page.locator('[data-slot="patents"]')).toHaveAttribute('data-remote-state', 'mounted');
+    await page.waitForTimeout(500); // let any superseded navigation finish what it would do
+    await expect(page.locator('.bf-remote-host')).toHaveCount(1);
+    expect(consoleErrors).toEqual([]);
+  });
+
   test('client-side navigation re-renders the view and publishes route:changed', async ({ page }) => {
     await page.addInitScript(recordBus);
     await page.goto('/');

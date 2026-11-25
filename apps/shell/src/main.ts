@@ -73,8 +73,13 @@ async function bootstrap(doc: Document = document): Promise<void> {
   const remotes = mounts;
   arch.setManifest(manifest);
 
+  // Navigations can overlap (a tap while the first page still waits for the ui components). Only the
+  // latest may render and mount; an older one that resumes would otherwise mount the newer page's slots too.
+  let latest = 0;
   const show = async (route: RouteMatch, prev: RouteMatch | null) => {
+    const ticket = ++latest;
     await remotes.unmountAll();
+    if (ticket !== latest) return;
     const main = renderView(doc, route, content, prev !== null);
     arch.refresh();
     if (prev) {
@@ -83,6 +88,7 @@ async function bootstrap(doc: Document = document): Promise<void> {
     }
     bus.publish('route:changed', { path: route.path, subPath: route.subPath, owner: route.owner });
     await ui;
+    if (ticket !== latest) return;
     remotes.mountRoute(route, main, { lazy: route.kind === 'home' });
   };
 
