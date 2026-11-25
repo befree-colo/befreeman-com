@@ -17,12 +17,13 @@ export const PROJECT_ARTIFACTS: Record<string, DeployPart> = {
   'remote-achievements': 'achievements',
   'remote-timeline': 'timeline',
   'remote-skills': 'skills',
+  'remote-patents': 'patents',
   'ui-components': 'ui',
   content: 'content',
 };
 
 /** Promotion order: ui first (smoke-checked against every live remote), then remotes, then content. */
-export const ALL_PARTS: readonly DeployPart[] = ['ui', 'achievements', 'timeline', 'skills', 'content'];
+export const ALL_PARTS: readonly DeployPart[] = ['ui', 'achievements', 'timeline', 'skills', 'patents', 'content'];
 
 /**
  * Map affected Nx projects to the parts to release, in promotion order.

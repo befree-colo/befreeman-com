@@ -1,4 +1,5 @@
 
+import { patentNumber } from '@befreeman/page-templates';
 import { expect, loadBundle, test } from './fixtures';
 
 const bundle = loadBundle();
@@ -32,6 +33,17 @@ test.describe('crawlable without JavaScript', () => {
     for (const s of bundle.skills) await expect(page.getByText(s.name, { exact: true })).toBeVisible();
   });
 
+  test('the patents page lists every patent with its number and Google Patents link', async ({ page }) => {
+    const res = await page.goto('/patents');
+    expect(res?.status()).toBe(200);
+    await expect(page.getByRole('heading', { level: 1, name: 'Patents' })).toBeVisible();
+    for (const p of bundle.patents) {
+      const link = page.getByRole('link', { name: `${p.title} (opens Google Patents in a new tab)`, exact: true });
+      await expect(link).toHaveAttribute('href', `https://patents.google.com/patent/${p.number}/en`);
+      await expect(page.locator(`li#${p.id}`)).toContainText(patentNumber(p.number));
+    }
+  });
+
   test('unknown URLs return a 404 page', async ({ page }) => {
     const res = await page.goto('/definitely/not/here');
     expect(res?.status()).toBe(404);
@@ -59,7 +71,7 @@ test.describe('discovery files', () => {
 });
 
 test.describe('progressive enhancement', () => {
-  for (const path of ['/skills', '/timeline', `/achievements/${bundle.achievements[0]!.id}`]) {
+  for (const path of ['/skills', '/timeline', '/patents', `/achievements/${bundle.achievements[0]!.id}`]) {
     test(`remote takeover on ${path} keeps layout shift at or below 0.1`, async ({ page }) => {
       await page.addInitScript(() => {
         (window as unknown as { __cls: number }).__cls = 0;

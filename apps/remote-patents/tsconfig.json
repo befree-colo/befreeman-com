@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node", "svelte"], "verbatimModuleSyntax": true },
+  "include": ["src/**/*", "src/**/*.svelte", "test/**/*.ts", "*.config.ts"]
+}

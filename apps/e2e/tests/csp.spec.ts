@@ -16,7 +16,7 @@ const recordViolations = () => {
 
 test.describe('content security policy', () => {
   test('pages are served with a strict script policy', async ({ request }) => {
-    for (const path of ['/', '/achievements', '/timeline', '/skills', '/not-a-page']) {
+    for (const path of ['/', '/achievements', '/timeline', '/skills', '/patents', '/not-a-page']) {
       const res = await request.get(path);
       const csp = res.headers()['content-security-policy'] ?? '';
       const scriptSrc =
@@ -30,15 +30,17 @@ test.describe('content security policy', () => {
     }
   });
 
-  test('the composed site runs all three remotes without a single violation', async ({
+  test('the composed site runs every remote without a single violation', async ({
     page,
     consoleErrors,
   }) => {
     await page.addInitScript(recordViolations);
-    await page.goto('/');
-    await waitForShell(page);
-    await waitForRemotes(page);
-    expect(await page.evaluate(() => window.__violations)).toEqual([]);
+    for (const path of ['/', '/patents']) {
+      await page.goto(path);
+      await waitForShell(page);
+      await waitForRemotes(page);
+      expect(await page.evaluate(() => window.__violations), path).toEqual([]);
+    }
     expect(consoleErrors).toEqual([]);
   });
 

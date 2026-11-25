@@ -72,6 +72,18 @@ export function pageMeta(route: RouteMatch, b: CareerContentBundle, site: string
         imagePath,
         image: { eyebrow: p.name, title: 'Skills', subtitle: b.skillCategories.map((c) => c.name).join(' · ') },
       };
+    case 'patents': {
+      const n = b.patents.length;
+      const count = `${n} issued U.S. patent${n === 1 ? '' : 's'}`;
+      return {
+        title,
+        description: clip(`${count} from ${p.name}: ${b.patents.map((x) => x.title).join('; ')}.`),
+        canonical,
+        ogType: 'website',
+        imagePath,
+        image: { eyebrow: p.name, title: 'Patents', subtitle: `${count}, each linked to its public record on Google Patents.` },
+      };
+    }
     case 'not-found':
       return {
         title,

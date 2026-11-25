@@ -18,6 +18,7 @@ libs/content/content/
   roles/<role-id>.md       # one file per job
   achievements/<id>.md     # one file per achievement
   case-studies/<id>.md     # optional long-form stories
+  patents/<number>.md      # one file per issued patent, e.g. us12530268b2.md
   skills.yaml              # skill categories and skills
 ```
 
@@ -25,7 +26,7 @@ Each Markdown file has YAML **frontmatter** between `---` lines, followed by an 
 
 **IDs** are URL-safe slugs: lowercase letters, digits, and single hyphens, e.g. `cloud-migration`. For roles, achievements, and case studies the ID is the **file name** without `.md`; you can override it with an `id:` field, but avoid doing so. IDs appear in URLs (`/achievements/<id>`) and are how entities reference each other, so treat them as permanent once published.
 
-Dates are `YYYY-MM`.
+Dates are `YYYY-MM`, except a patent's `issued`, which is the full `YYYY-MM-DD` issue date.
 
 ## Fields
 
@@ -73,6 +74,20 @@ Dates are `YYYY-MM`.
 | `achievements` | yes | list of achievement IDs it tells the story of |
 | body | recommended | use `## Problem`, `## Approach`, `## Outcome` headings |
 
+### `patents/<number>.md`
+
+Name the file after the publication number in lowercase, e.g. `patents/us12530268b2.md`. The site builds the Google
+Patents link and the display form (`US 12,530,268 B2`) from `number`, so there is no URL field.
+
+| Field | Required | Notes |
+|---|---|---|
+| `title` | yes | exactly as issued |
+| `number` | yes | U.S. publication number with kind code, e.g. `US12530268B2`; must be unique |
+| `issued` | yes | issue date, `YYYY-MM-DD` |
+| `assignee` | yes | company the invention was made for, e.g. `Dell` |
+| `summary` | yes | one plain-language sentence |
+| `role` | no | role ID the invention was made in; links the patent to the timeline |
+
 ### `skills.yaml`
 
 ```yaml
@@ -89,7 +104,7 @@ categories:
 
 The build fails when:
 - a field is missing or malformed (see the tables above);
-- two entities of the same type share an ID;
+- two entities of the same type share an ID, or two patents share a publication number;
 - a reference (`role`, `skills`, `caseStudy`, `achievements`) points to an ID that does not exist;
 - an achievement has no impact statement.
 

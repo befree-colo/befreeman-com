@@ -19,7 +19,7 @@ module.exports = {
     collect: {
       startServerCommand: `env PORT=${port} pnpm exec tsx src/compose-server.ts`,
       startServerReadyPattern: 'composed site on',
-      url: ['/', '/achievements', `/achievements/${achievement}`, '/timeline', '/skills'].map(
+      url: ['/', '/achievements', `/achievements/${achievement}`, '/timeline', '/skills', '/patents'].map(
         (p) => base + p,
       ),
       numberOfRuns: 1,

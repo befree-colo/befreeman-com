@@ -30,6 +30,7 @@ const LABELS: Record<string, string> = {
   achievements: 'achievements view',
   timeline: 'timeline',
   skills: 'skills radar',
+  patents: 'patents',
 };
 
 interface Active {

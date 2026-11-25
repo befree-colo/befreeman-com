@@ -1,0 +1,17 @@
+{
+  "name": "@befreeman/remote-patents",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "svelte": "5.59.1",
+    "@befreeman/mfe-contract": "workspace:*",
+    "@befreeman/content": "workspace:*",
+    "@befreeman/design-system": "workspace:*",
+    "@befreeman/page-templates": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "7.3.2",
+    "svelte-check": "4.7.8"
+  }
+}

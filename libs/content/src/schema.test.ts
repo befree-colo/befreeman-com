@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { achievementSchema, idSchema, profileSchema, roleSchema, skillsFileSchema } from './schema';
+import { achievementSchema, idSchema, patentSchema, profileSchema, roleSchema, skillsFileSchema } from './schema';
 
 const achievement = {
   id: 'cloud-migration',
@@ -8,6 +8,15 @@ const achievement = {
   role: 'acme-architect',
   skills: ['aws'],
   impact: ['Cut infrastructure cost by 30%'],
+};
+
+const patent = {
+  id: 'us12530268b2',
+  title: 'Self-healing for data protection systems',
+  number: 'US12530268B2',
+  issued: '2026-01-20',
+  assignee: 'Dell',
+  summary: 'Records and replays fixes.',
 };
 
 describe('content schemas', () => {
@@ -74,5 +83,26 @@ describe('content schemas', () => {
     expect(skillsFileSchema.safeParse(file(5)).success).toBe(true);
     expect(skillsFileSchema.safeParse(file(0)).success).toBe(false);
     expect(skillsFileSchema.safeParse(file(6)).success).toBe(false);
+  });
+
+  it('accepts a valid patent with an optional role', () => {
+    const parsed = patentSchema.parse(patent);
+    expect(parsed.role).toBeUndefined();
+    expect(parsed.placeholder).toBe(false);
+    expect(patentSchema.safeParse({ ...patent, role: 'acme' }).success).toBe(true);
+    expect(patentSchema.safeParse({ ...patent, number: 'US8218532B1' }).success).toBe(true);
+  });
+
+  it.each(['12530268', 'US12530268', '12530268B2', 'us12530268b2', 'US 12,530,268 B2', 'EP1234567B1'])(
+    'rejects malformed patent number %s',
+    (number) => {
+      const result = patentSchema.safeParse({ ...patent, number });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toMatch(/U\.S\. publication number/);
+    },
+  );
+
+  it.each(['2026-01', '2026-13-01', '2026-01-32', 'Jan 20, 2026'])('rejects patent issue date %s', (issued) => {
+    expect(patentSchema.safeParse({ ...patent, issued }).success).toBe(false);
   });
 });

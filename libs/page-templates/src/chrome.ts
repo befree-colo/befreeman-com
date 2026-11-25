@@ -42,7 +42,7 @@ export function footer(b: CareerContentBundle): SafeHtml {
         : ''}
       ${contactLinks(b)}
     </div>
-    <p class="mt-12 text-sm text-ink-muted">© ${b.profile.name}. Built as runtime-composed micro frontends: Angular, React, and Vue in one page.</p>
+    <p class="mt-12 text-sm text-ink-muted">© ${b.profile.name}. Built as runtime-composed micro frontends: Angular, React, Vue, and Svelte in one site.</p>
   </div>`;
 }
 
@@ -60,6 +60,8 @@ export function pageTitle(route: RouteMatch, b: CareerContentBundle): string {
       return `Career timeline · ${b.profile.name}`;
     case 'skills':
       return `Skills · ${b.profile.name}`;
+    case 'patents':
+      return `Patents · ${b.profile.name}`;
     case 'not-found':
       return `Page not found · ${b.profile.name}`;
   }

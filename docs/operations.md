@@ -179,7 +179,7 @@ pnpm release <command> [--local | --remote] [--env staging|production]
 ### First deployment (bootstrap)
 
 ```bash
-pnpm nx run-many -t build -p remote-achievements remote-timeline remote-skills ui-components
+pnpm nx run-many -t build -p remote-achievements remote-timeline remote-skills remote-patents ui-components
 pnpm nx run prerender:run                                    # shell + pre-rendered pages + content bundle
 
 pnpm release publish achievements --remote --env staging     # prints VERSION=<semver>-<sha>
@@ -252,7 +252,7 @@ curl -sI https://<site>/mfe-manifest.json                  # ETag, cache headers
 ## Rehearsing locally
 
 ```bash
-pnpm nx run prerender:run && pnpm nx run-many -t build -p remote-achievements remote-timeline remote-skills ui-components
+pnpm nx run prerender:run && pnpm nx run-many -t build -p remote-achievements remote-timeline remote-skills remote-patents ui-components
 printf 'PREVIEW_SECRET=local-dev-secret\n' > apps/edge/.dev.vars     # gitignored
 # publish + init as above, without --remote
 pnpm nx serve edge                                                    # wrangler dev on :8787

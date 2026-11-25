@@ -1,3 +1,4 @@
+import { HOME_REMOTES } from '@befreeman/page-templates';
 import { expect, test, waitForShell } from './fixtures';
 
 interface Manifest {
@@ -23,7 +24,8 @@ test.describe('architecture view', () => {
     await expect(page.locator('html')).toHaveAttribute('data-arch', '');
     await scrollThroughSlots(page);
 
-    for (const [name, r] of Object.entries(manifest.remotes)) {
+    for (const name of HOME_REMOTES) {
+      const r = manifest.remotes[name]!;
       const slot = page.locator(`[data-slot="${name}"]`);
       await expect(slot).toHaveAttribute('data-remote-state', 'mounted');
       const label = slot.locator(':scope > .bf-arch-label');
@@ -36,6 +38,19 @@ test.describe('architecture view', () => {
 
     await toggle.click();
     await expect(page.locator('.bf-arch-label').first()).toBeHidden();
+  });
+
+  test('labels the Svelte patents remote on its own page', async ({ page, request }) => {
+    const manifest = (await (await request.get('/mfe-manifest.json')).json()) as Manifest;
+    const r = manifest.remotes['patents']!;
+    expect(r.framework).toBe('svelte');
+    await page.goto('/patents');
+    await waitForShell(page);
+    await page.getByRole('button', { name: 'Architecture view' }).click();
+    const slot = page.locator('[data-slot="patents"]');
+    await expect(slot).toHaveAttribute('data-remote-state', 'mounted');
+    await expect(slot.locator(':scope > .bf-arch-label')).toHaveText(`patents · svelte · ${r.version}`);
+    expect(await slot.evaluate((el) => getComputedStyle(el).outlineColor)).toBe('rgb(255, 62, 0)');
   });
 
   test('labels a remote that failed to load as unavailable with the attempted version', async ({ page, request }) => {

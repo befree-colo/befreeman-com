@@ -12,11 +12,12 @@ import type { Stores } from './stores';
 
 describe('planDeploy', () => {
   it('first deploy / --all / unknown base: everything, in promotion order', () => {
-    expect(planDeploy(null)).toEqual(['ui', 'achievements', 'timeline', 'skills', 'content']);
+    expect(planDeploy(null)).toEqual(['ui', 'achievements', 'timeline', 'skills', 'patents', 'content']);
   });
 
   it('timeline-only change: only the timeline', () => {
     expect(planDeploy(['remote-timeline'])).toEqual(['timeline']);
+    expect(planDeploy(['remote-patents'])).toEqual(['patents']);
   });
 
   it('shared library change: every dependent part Nx reports, nothing else', () => {
@@ -59,7 +60,7 @@ afterEach(async () => {
 /** Fake build output for `sha`: every part's dist, and a content bundle whose version is `contentVersion`. */
 async function fakeDists(sha: string, contentVersion: string) {
   const root = join(tmp, sha);
-  for (const part of ['ui', 'achievements', 'timeline', 'skills']) {
+  for (const part of ['ui', 'achievements', 'timeline', 'skills', 'patents']) {
     await mkdir(join(root, part), { recursive: true });
     await writeFile(join(root, part, part === 'ui' ? 'ui.js' : 'remoteEntry.js'), `/* ${part} ${sha} */`);
   }
