@@ -2,6 +2,7 @@ import { expect, loadBundle, test, waitForRemotes, waitForShell } from './fixtur
 
 const bundle = loadBundle();
 const WIDTH = 375;
+const NAV = ['Achievements', 'Timeline', 'Skills', 'Patents'];
 
 test.use({ viewport: { width: WIDTH, height: 812 }, isMobile: true, hasTouch: true });
 
@@ -15,6 +16,7 @@ test.describe('phone-width viewport (375px)', () => {
     `/achievements/${bundle.achievements[0]!.id}`,
     '/timeline',
     '/skills',
+    '/patents',
     '/not-a-page',
   ]) {
     test(`${path} has no horizontal page scroll`, async ({ page, consoleErrors }) => {
@@ -22,7 +24,10 @@ test.describe('phone-width viewport (375px)', () => {
       await waitForShell(page);
       await waitForRemotes(page);
       expect(await pageWidth(page)).toBeLessThanOrEqual(WIDTH);
-      for (const link of await page.getByRole('navigation', { name: 'Primary' }).getByRole('link').all()) {
+      const navLinks = await page.getByRole('navigation', { name: 'Primary' }).getByRole('link').all();
+      // Role queries skip hidden links: count them so a nav hidden at this width fails the test.
+      expect(navLinks.length).toBe(NAV.length + 1);
+      for (const link of navLinks) {
         const box = (await link.boundingBox())!;
         expect(box.x).toBeGreaterThanOrEqual(0);
         expect(box.x + box.width).toBeLessThanOrEqual(WIDTH);
@@ -31,6 +36,30 @@ test.describe('phone-width viewport (375px)', () => {
       expect(consoleErrors.filter((e) => !(path === '/not-a-page' && e.includes('404')))).toEqual([]);
     });
   }
+
+  test('every section is reachable from the primary navigation', async ({ page }) => {
+    await page.goto('/');
+    await waitForShell(page);
+    const nav = page.getByRole('navigation', { name: 'Primary' });
+    for (const name of NAV) await expect(nav.getByRole('link', { name, exact: true })).toBeVisible();
+    await nav.getByRole('link', { name: 'Patents', exact: true }).tap();
+    await expect(page).toHaveURL(/\/patents$/);
+    await waitForRemotes(page);
+    await expect(page.locator('.bf-remote-host[data-remote="patents"]').getByTestId('patents')).toBeVisible();
+  });
+
+  test('the navigation fits a 320px viewport', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('/');
+    await waitForShell(page);
+    expect(await pageWidth(page)).toBeLessThanOrEqual(320);
+    for (const name of NAV) {
+      const box = (await page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name, exact: true }).boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(320);
+      expect(box.height).toBeGreaterThanOrEqual(24); // WCAG 2.2 target size (minimum)
+    }
+  });
 
   test('achievement cards reflow to a single column', async ({ page }) => {
     await page.goto('/achievements');
