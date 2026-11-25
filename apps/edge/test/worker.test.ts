@@ -35,6 +35,7 @@ beforeEach(async () => {
   await env.ARTIFACTS.put('remotes/timeline/1.0.0-a/remoteEntry.js', 'export const a = 1;');
   await env.ARTIFACTS.put('remotes/timeline/1.1.0-b/remoteEntry.js', 'export const b = 2;');
   await env.ARTIFACTS.put('ui/u2/ui.js', 'export {};');
+  await env.ARTIFACTS.put('remotes/patents/0.0.0-p1/remoteEntry.js', 'export const p = 1;');
   await env.ARTIFACTS.put('content/content.c1.json', '{"version":"c1"}', { httpMetadata: { contentType: 'application/json' } });
 });
 
@@ -148,6 +149,20 @@ describe('signed preview override (?mfe-override)', () => {
     const res = await call(`/mfe-manifest.json?${await qs([{ name: 'timeline', version: '1.1.0-b' }], 'wrong-secret')}`);
     expect(res.headers.get('x-bf-preview')).toBe('rejected: bad-signature');
     expect(((await res.json()) as DeploymentManifest).remotes['timeline']!.version).toBe('1.0.0-a');
+  });
+
+  it('a registered remote that is not live yet can be previewed, using its registry entry', async () => {
+    const res = await call(`/mfe-manifest.json?${await qs([{ name: 'patents', version: '0.0.0-p1' }])}`);
+    expect(res.headers.get('x-bf-preview')).toBe('applied');
+    const body = (await res.json()) as DeploymentManifest;
+    expect(body.remotes['patents']).toEqual({ version: '0.0.0-p1', entry: '/remotes/patents/0.0.0-p1/remoteEntry.js', type: 'module', scope: 'bf_patents', framework: 'svelte' });
+    expect(body.remotes['timeline']!.version).toBe('1.0.0-a');
+  });
+
+  it('a remote that is neither live nor registered is rejected', async () => {
+    await env.ARTIFACTS.put('remotes/mystery/1.0.0/remoteEntry.js', 'export {};');
+    const res = await call(`/mfe-manifest.json?${await qs([{ name: 'mystery', version: '1.0.0' }])}`);
+    expect(res.headers.get('x-bf-preview')).toBe('rejected: unknown remote mystery');
   });
 
   it('an unknown (unpublished) version is rejected even with a valid token', async () => {

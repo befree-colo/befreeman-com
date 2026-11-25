@@ -181,6 +181,50 @@ describe('deploy', () => {
     expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_B);
   });
 
+  /** Staging as it was before a remote existed: first deploy, then drop `name` from the live manifest. */
+  async function withoutRemote(name: string) {
+    await firstDeploy(staging);
+    const live = (await readLive(staging))!;
+    delete live.remotes[name];
+    await staging.manifests.put(LIVE, JSON.stringify(live));
+  }
+
+  it('a new remote is promoted after the Worker deploy, which ships its page', async () => {
+    await withoutRemote('patents');
+    const order: string[] = [];
+    const smoke = vi.fn<SmokeCheck>(async (overrides) => {
+      order.push(`smoke ${overrides.map((o) => o.name).join(',')}`);
+      return [];
+    });
+    const h = await harness({
+      stores: staging,
+      head: SHA_B,
+      affected: ['remote-patents', 'remote-timeline'],
+      smoke,
+      deployWorker: async () => void order.push('worker'),
+    });
+    const res = await deploy(h.deps);
+    expect(order).toEqual(['smoke timeline', 'worker', 'smoke patents']);
+    expect(res.promoted).toEqual(['timeline@1.0.0-bbbbbbb', 'patents@1.0.0-bbbbbbb']);
+    expect((await readLive(staging))?.remotes.patents).toMatchObject({ version: '1.0.0-bbbbbbb', scope: 'bf_patents', framework: 'svelte' });
+    expect(h.logs).toContain('patents is a new remote: promoting it after the Worker deploy, which ships its page');
+    expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_B);
+  });
+
+  it('a new remote failing its smoke check after the Worker deploy leaves it unpromoted and the commit unrecorded', async () => {
+    await withoutRemote('patents');
+    const failing = await harness({ stores: staging, head: SHA_B, affected: ['remote-patents'], smoke: async () => ['patents: remote state is "failed"'] });
+    await expect(deploy(failing.deps)).rejects.toThrow(/smoke check failed for patents/);
+    expect(failing.workerDeploys).toBe(1);
+    expect((await readLive(staging))?.remotes.patents).toBeUndefined();
+    expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_A);
+
+    const retry = await harness({ stores: staging, head: SHA_B, affected: ['remote-patents'] });
+    await deploy(retry.deps);
+    expect((await readLive(staging))?.remotes.patents?.version).toBe('1.0.0-bbbbbbb');
+    expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_B);
+  });
+
   it('a failed Worker deploy leaves the recorded commit unchanged', async () => {
     await firstDeploy(staging);
     const h = await harness({

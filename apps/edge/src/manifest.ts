@@ -2,6 +2,7 @@ import { manifestSchema } from '@befreeman/mfe-contract/manifest';
 import { verifyPreview } from '@befreeman/mfe-contract/preview';
 import type { DeploymentManifest } from '@befreeman/mfe-contract/manifest';
 import type { PreviewOverride } from '@befreeman/mfe-contract/preview';
+import { REMOTE_REGISTRY, isRegisteredRemote } from '@befreeman/mfe-contract/registry';
 import { LIVE_MANIFEST_KEY } from './env';
 import type { Env } from './env';
 
@@ -37,7 +38,10 @@ export async function applyPreview(env: Env, live: DeploymentManifest, params: U
   if (!verdict.ok) return verdict.reason === 'missing' ? { status: 'none', manifest: live } : { status: 'rejected', reason: verdict.reason, manifest: live };
   const next: DeploymentManifest = structuredClone(live);
   for (const o of verdict.overrides) {
-    const current = live.remotes[o.name];
+    // A registered remote that is not live yet (its first release) may be previewed too, so it can be
+    // smoke-checked before promotion; its scope, type and framework come from the registry.
+    const registered = isRegisteredRemote(o.name) ? REMOTE_REGISTRY[o.name] : undefined;
+    const current = live.remotes[o.name] ?? (registered && { version: '', entry: '', type: registered.type, scope: registered.scope, framework: registered.framework });
     if (o.name !== 'ui' && !current) return { status: 'rejected', reason: `unknown remote ${o.name}`, manifest: live };
     if (!(await env.ARTIFACTS.head(entryKey(o)))) return { status: 'rejected', reason: `unknown version ${o.name}@${o.version}`, manifest: live };
     if (o.name === 'ui') next.ui = { version: o.version, entry: `/${entryKey(o)}` };
