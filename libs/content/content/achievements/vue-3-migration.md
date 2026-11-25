@@ -6,6 +6,8 @@ skills: [css, html5, micro-frontends, typescript, webpack, vue]
 impact:
   - Kept the platform stable throughout a migration spanning 10 teams
   - Standardized architectural patterns across the teams' applications
+  - Moved the platform off end-of-life Vue 2
+  - Upgraded the shared UI component library that every module depends on
 metrics:
   - { label: Teams migrated, value: "10" }
 caseStudy: vue-3-platform-migration
