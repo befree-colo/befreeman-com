@@ -174,6 +174,8 @@ async function main() {
         all: values.all,
         // Remote KV is eventually consistent: give staging's fresh verification marker ~90s to appear.
         ...(mode === 'remote' ? { verifyWait: { attempts: 10, delayMs: 10_000 } } : {}),
+        // A new Worker version reaches every Cloudflare location gradually: give it ~1 minute before a new remote's smoke check fails.
+        ...(mode === 'remote' ? { workerSettle: { attempts: 5, delayMs: 15_000 } } : {}),
         affected: async (base) => {
           try {
             git(['cat-file', '-e', `${base}^{commit}`]);

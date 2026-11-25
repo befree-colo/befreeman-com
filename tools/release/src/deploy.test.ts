@@ -86,6 +86,7 @@ async function harness(opts: {
   smoke?: SmokeCheck;
   contentVersion?: string;
   deployWorker?: () => Promise<void>;
+  workerSettle?: { attempts: number; delayMs: number };
 }): Promise<Harness> {
   const root = await fakeDists(opts.head, opts.contentVersion ?? 'c1');
   const h: Harness = { built: [], workerDeploys: 0, logs: [], deps: undefined as unknown as DeployDeps };
@@ -95,6 +96,7 @@ async function harness(opts: {
     env: opts.env ?? 'staging',
     head: opts.head,
     ...(opts.all ? { all: true } : {}),
+    ...(opts.workerSettle ? { workerSettle: opts.workerSettle } : {}),
     affected: async () => (opts.affected === undefined ? [] : opts.affected),
     build: async (parts) => void h.built.push(parts),
     versionFor: () => `1.0.0-${opts.head.slice(0, 7)}`,
@@ -223,6 +225,28 @@ describe('deploy', () => {
     await deploy(retry.deps);
     expect((await readLive(staging))?.remotes.patents?.version).toBe('1.0.0-bbbbbbb');
     expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_B);
+  });
+
+  it("a new remote's smoke check is retried while the new Worker rolls out", async () => {
+    await withoutRemote('patents');
+    let calls = 0;
+    const smoke = vi.fn<SmokeCheck>(async () => (++calls < 3 ? ['patents: console error: Refused to apply style'] : []));
+    const h = await harness({ stores: staging, head: SHA_B, affected: ['remote-patents'], smoke, workerSettle: { attempts: 3, delayMs: 0 } });
+    const res = await deploy(h.deps);
+    expect(smoke).toHaveBeenCalledTimes(3);
+    expect(res.promoted).toEqual(['patents@1.0.0-bbbbbbb']);
+    expect(h.logs).toContain('patents@1.0.0-bbbbbbb failed its smoke check while the new Worker rolls out; re-checking in 0s (1/3)');
+    expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_B);
+  });
+
+  it('a new remote that keeps failing after every retry fails the deploy', async () => {
+    await withoutRemote('patents');
+    const smoke = vi.fn<SmokeCheck>(async () => ['patents: remote state is "failed"']);
+    const h = await harness({ stores: staging, head: SHA_B, affected: ['remote-patents'], smoke, workerSettle: { attempts: 2, delayMs: 0 } });
+    await expect(deploy(h.deps)).rejects.toThrow(/smoke check failed for patents/);
+    expect(smoke).toHaveBeenCalledTimes(2);
+    expect((await readLive(staging))?.remotes.patents).toBeUndefined();
+    expect(await staging.manifests.get(DEPLOY_COMMIT)).toBe(SHA_A);
   });
 
   it('a failed Worker deploy leaves the recorded commit unchanged', async () => {
